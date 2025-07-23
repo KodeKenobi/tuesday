@@ -4,9 +4,10 @@ import { getUserFromToken } from "@/lib/auth";
 
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const authHeader = request.headers.get("authorization");
     if (!authHeader?.startsWith("Bearer ")) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -30,7 +31,7 @@ export async function PATCH(
 
     // Get the ticket to check permissions
     const ticket = await db.ticket.findUnique({
-      where: { id: params.id },
+      where: { id },
       include: {
         client: true,
       },
@@ -59,7 +60,7 @@ export async function PATCH(
     }
 
     const updatedTicket = await db.ticket.update({
-      where: { id: params.id },
+      where: { id },
       data: { status },
       include: {
         creator: {

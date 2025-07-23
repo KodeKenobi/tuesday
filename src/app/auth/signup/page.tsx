@@ -4,7 +4,20 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/contexts/AuthContext";
-import { Eye, EyeOff, Mail, Lock, User } from "lucide-react";
+import {
+  Eye,
+  EyeOff,
+  Mail,
+  Lock,
+  User,
+  Loader2,
+  AlertCircle,
+  CheckCircle,
+  Users,
+  Calendar,
+  BarChart3,
+} from "lucide-react";
+import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 
 export default function SignupPage() {
@@ -18,11 +31,8 @@ export default function SignupPage() {
   const { signup, user } = useAuth();
   const router = useRouter();
 
-  // Redirect when user is available
   useEffect(() => {
-    console.log("Signup page - user changed:", user);
     if (user) {
-      console.log("Redirecting user with role:", user.role);
       if (user.role === "CLIENT") {
         router.replace("/client/dashboard");
       } else {
@@ -37,10 +47,7 @@ export default function SignupPage() {
     setLoading(true);
 
     try {
-      console.log("Attempting signup...");
       await signup(email, password, name, role);
-      console.log("Signup successful, waiting for user state update...");
-      // The redirect will happen in the useEffect when user state updates
     } catch (error) {
       console.error("Signup error:", error);
       setError(error instanceof Error ? error.message : "Signup failed");
@@ -49,152 +56,306 @@ export default function SignupPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#121212] p-4">
-      <div className="w-full max-w-md">
-        <div className="bg-[#1E1E1E] rounded-2xl p-8 shadow-2xl border border-[#2A2A2A]">
-          <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold text-white mb-2">
-              Create Account
-            </h1>
-            <p className="text-[#B3B3B3]">Join us to get started</p>
-          </div>
+    <div className="min-h-screen bg-gradient-to-br from-[#0f172a] via-[#1e293b] to-[#334155] relative overflow-hidden">
+      {/* Background blur orbs */}
+      <div className="absolute w-[400px] h-[400px] bg-pink-500/30 rounded-full blur-[120px] top-[-100px] left-[-100px]"></div>
+      <div className="absolute w-[400px] h-[400px] bg-blue-500/30 rounded-full blur-[120px] bottom-[-100px] right-[-100px]"></div>
 
-          {error && (
-            <div className="mb-6 p-4 bg-[#EF4444]/10 border border-[#EF4444]/20 rounded-lg">
-              <p className="text-[#EF4444] text-sm">{error}</p>
-            </div>
-          )}
-
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div>
-              <label
-                htmlFor="name"
-                className="block text-sm font-medium text-[#B3B3B3] mb-2"
-              >
-                Full Name
-              </label>
-              <div className="relative">
-                <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[#B3B3B3] w-5 h-5" />
-                <input
-                  id="name"
-                  type="text"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  className="w-full pl-10 pr-4 py-3 bg-[#2A2A2A] border border-[#3A3A3A] rounded-lg text-white placeholder-[#B3B3B3] focus:border-[#6366F1] focus:outline-none transition-colors"
-                  placeholder="Enter your full name"
-                  required
-                />
-              </div>
-            </div>
-
-            <div>
-              <label
-                htmlFor="email"
-                className="block text-sm font-medium text-[#B3B3B3] mb-2"
-              >
-                Email
-              </label>
-              <div className="relative">
-                <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[#B3B3B3] w-5 h-5" />
-                <input
-                  id="email"
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="w-full pl-10 pr-4 py-3 bg-[#2A2A2A] border border-[#3A3A3A] rounded-lg text-white placeholder-[#B3B3B3] focus:border-[#6366F1] focus:outline-none transition-colors"
-                  placeholder="Enter your email"
-                  required
-                />
-              </div>
-            </div>
-
-            <div>
-              <label
-                htmlFor="password"
-                className="block text-sm font-medium text-[#B3B3B3] mb-2"
-              >
-                Password
-              </label>
-              <div className="relative">
-                <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[#B3B3B3] w-5 h-5" />
-                <input
-                  id="password"
-                  type={showPassword ? "text" : "password"}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="w-full pl-10 pr-12 py-3 bg-[#2A2A2A] border border-[#3A3A3A] rounded-lg text-white placeholder-[#B3B3B3] focus:border-[#6366F1] focus:outline-none transition-colors"
-                  placeholder="Create a password"
-                  required
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-[#B3B3B3] hover:text-white transition-colors"
-                >
-                  {showPassword ? (
-                    <EyeOff className="w-5 h-5" />
-                  ) : (
-                    <Eye className="w-5 h-5" />
-                  )}
-                </button>
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-[#B3B3B3] mb-2">
-                Account Type
-              </label>
-              <div className="grid grid-cols-2 gap-3">
-                <button
-                  type="button"
-                  onClick={() => setRole("USER")}
-                  className={cn(
-                    "py-3 px-4 rounded-lg border transition-all duration-200",
-                    role === "USER"
-                      ? "bg-[#6366F1] border-[#6366F1] text-white"
-                      : "bg-[#2A2A2A] border-[#3A3A3A] text-[#B3B3B3] hover:border-[#6366F1]"
-                  )}
-                >
-                  User
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setRole("CLIENT")}
-                  className={cn(
-                    "py-3 px-4 rounded-lg border transition-all duration-200",
-                    role === "CLIENT"
-                      ? "bg-[#6366F1] border-[#6366F1] text-white"
-                      : "bg-[#2A2A2A] border-[#3A3A3A] text-[#B3B3B3] hover:border-[#6366F1]"
-                  )}
-                >
-                  Client
-                </button>
-              </div>
-            </div>
-
-            <button
-              type="submit"
-              disabled={loading}
-              className={cn(
-                "w-full py-3 px-4 bg-gradient-to-r from-[#6366F1] to-[#8B5CF6] text-white font-medium rounded-lg hover:from-[#5B5BD6] hover:to-[#7C3AED] transition-all duration-200 transform hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-[#6366F1] focus:ring-offset-2 focus:ring-offset-[#1E1E1E]",
-                loading && "opacity-50 cursor-not-allowed"
-              )}
+      <div className="flex min-h-screen">
+        {/* Left side - Clean branding */}
+        <div className="hidden lg:flex lg:w-1/2 relative">
+          <div className="absolute inset-0 bg-gradient-to-br from-pink-500/10 to-purple-600/10"></div>
+          <div className="relative z-10 flex flex-col justify-center px-16 text-white">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, ease: "easeOut" }}
+              className="mb-16"
             >
-              {loading ? "Creating account..." : "Create Account"}
-            </button>
-          </form>
+              <h1 className="text-5xl font-bold mb-4 tracking-tight">
+                Tuesday
+              </h1>
+              <p className="text-xl text-gray-300 font-medium">
+                Simple ticket management for modern teams
+              </p>
+            </motion.div>
 
-          <div className="mt-6 text-center">
-            <p className="text-[#B3B3B3] text-sm">
-              Already have an account?{" "}
-              <Link
-                href="/auth/login"
-                className="text-[#6366F1] hover:text-[#5B5BD6] transition-colors"
-              >
-                Sign in
-              </Link>
-            </p>
+            {/* Clean feature list */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+              className="space-y-8"
+            >
+              <div className="flex items-start space-x-4">
+                <div className="w-8 h-8 bg-pink-500/20 rounded-lg flex items-center justify-center flex-shrink-0 mt-1">
+                  <CheckCircle className="w-5 h-5 text-pink-400" />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-lg mb-2">
+                    Streamlined Workflow
+                  </h3>
+                  <p className="text-gray-400 leading-relaxed">
+                    Manage tickets with a simple 5-step process from backlog to
+                    completion
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-start space-x-4">
+                <div className="w-8 h-8 bg-purple-500/20 rounded-lg flex items-center justify-center flex-shrink-0 mt-1">
+                  <Users className="w-5 h-5 text-purple-400" />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-lg mb-2">
+                    Role-Based Access
+                  </h3>
+                  <p className="text-gray-400 leading-relaxed">
+                    Separate portals for team members and clients with
+                    appropriate permissions
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-start space-x-4">
+                <div className="w-8 h-8 bg-blue-500/20 rounded-lg flex items-center justify-center flex-shrink-0 mt-1">
+                  <BarChart3 className="w-5 h-5 text-blue-400" />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-lg mb-2">
+                    Real-time Updates
+                  </h3>
+                  <p className="text-gray-400 leading-relaxed">
+                    Track progress and status changes instantly across your team
+                  </p>
+                </div>
+              </div>
+            </motion.div>
+
+            {/* Stats or social proof */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.4 }}
+              className="mt-16 pt-8 border-t border-white/10"
+            >
+              <div className="flex space-x-8">
+                <div>
+                  <div className="text-2xl font-bold text-white">5</div>
+                  <div className="text-sm text-gray-400">Status Types</div>
+                </div>
+                <div>
+                  <div className="text-2xl font-bold text-white">∞</div>
+                  <div className="text-sm text-gray-400">Unlimited Tickets</div>
+                </div>
+                <div>
+                  <div className="text-2xl font-bold text-white">24/7</div>
+                  <div className="text-sm text-gray-400">Access</div>
+                </div>
+              </div>
+            </motion.div>
           </div>
+        </div>
+
+        {/* Right side - Signup Form */}
+        <div className="flex-1 flex items-center justify-center px-6 sm:px-8 lg:px-12 py-12">
+          {/* Mobile logo */}
+          <div className="lg:hidden text-center mb-8">
+            <h1 className="text-4xl font-bold text-white mb-2">Tuesday</h1>
+            <p className="text-gray-300 text-lg">Create your account</p>
+          </div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, ease: "easeOut" }}
+            className="relative z-10 w-full max-w-md bg-white/10 backdrop-blur-xl border border-white/20 shadow-2xl rounded-3xl p-10"
+          >
+            {/* Header */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 }}
+              className="text-center mb-8"
+            >
+              <h1 className="text-4xl font-bold text-white tracking-tight">
+                Join Tuesday
+              </h1>
+              <p className="mt-2 text-gray-300 text-lg">Create your account</p>
+            </motion.div>
+
+            {error && (
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl flex items-center gap-3"
+              >
+                <AlertCircle className="w-5 h-5 text-red-500" />
+                <span className="text-red-700 text-sm">{error}</span>
+              </motion.div>
+            )}
+
+            {/* Form */}
+            <form onSubmit={handleSubmit} className="space-y-5">
+              {/* Name Field */}
+              <motion.div
+                initial={{ opacity: 0, y: 15 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.15 }}
+              >
+                <label
+                  htmlFor="name"
+                  className="block text-sm font-medium text-gray-200 mb-2"
+                >
+                  Full Name
+                </label>
+                <div className="relative">
+                  <User className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
+                  <input
+                    id="name"
+                    type="text"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    className="w-full pl-12 pr-4 py-3 rounded-xl bg-white/20 text-white placeholder-gray-300 border border-white/20 focus:border-pink-400 focus:ring-2 focus:ring-pink-500 outline-none transition text-base"
+                    placeholder="Enter your full name"
+                    required
+                  />
+                </div>
+              </motion.div>
+
+              {/* Email Field */}
+              <motion.div
+                initial={{ opacity: 0, y: 15 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2 }}
+              >
+                <label
+                  htmlFor="email"
+                  className="block text-sm font-medium text-gray-200 mb-2"
+                >
+                  Email
+                </label>
+                <div className="relative">
+                  <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
+                  <input
+                    id="email"
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="w-full pl-12 pr-4 py-3 rounded-xl bg-white/20 text-white placeholder-gray-300 border border-white/20 focus:border-pink-400 focus:ring-2 focus:ring-pink-500 outline-none transition text-base"
+                    placeholder="you@example.com"
+                    required
+                  />
+                </div>
+              </motion.div>
+
+              {/* Password Field */}
+              <motion.div
+                initial={{ opacity: 0, y: 15 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.25 }}
+              >
+                <label
+                  htmlFor="password"
+                  className="block text-sm font-medium text-gray-200 mb-2"
+                >
+                  Password
+                </label>
+                <div className="relative">
+                  <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
+                  <input
+                    id="password"
+                    type={showPassword ? "text" : "password"}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="w-full pl-12 pr-12 py-3 rounded-xl bg-white/20 text-white placeholder-gray-300 border border-white/20 focus:border-pink-400 focus:ring-2 focus:ring-pink-500 outline-none transition text-base"
+                    placeholder="••••••••"
+                    required
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white"
+                  >
+                    {showPassword ? (
+                      <EyeOff className="w-5 h-5" />
+                    ) : (
+                      <Eye className="w-5 h-5" />
+                    )}
+                  </button>
+                </div>
+              </motion.div>
+
+              {/* Role Selection */}
+              <motion.div
+                initial={{ opacity: 0, y: 15 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3 }}
+              >
+                <label className="block text-sm font-medium text-gray-200 mb-2">
+                  Account Type
+                </label>
+                <div className="grid grid-cols-2 gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setRole("USER")}
+                    className={cn(
+                      "py-3 px-4 rounded-xl border transition-all duration-200 text-sm font-medium",
+                      role === "USER"
+                        ? "bg-pink-500 border-pink-500 text-white shadow-lg"
+                        : "bg-white/20 border-white/20 text-gray-300 hover:border-pink-400 hover:bg-white/30"
+                    )}
+                  >
+                    User
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setRole("CLIENT")}
+                    className={cn(
+                      "py-3 px-4 rounded-xl border transition-all duration-200 text-sm font-medium",
+                      role === "CLIENT"
+                        ? "bg-pink-500 border-pink-500 text-white shadow-lg"
+                        : "bg-white/20 border-white/20 text-gray-300 hover:border-pink-400 hover:bg-white/30"
+                    )}
+                  >
+                    Client
+                  </button>
+                </div>
+              </motion.div>
+
+              {/* Submit Button */}
+              <motion.button
+                type="submit"
+                disabled={loading}
+                whileTap={{ scale: 0.97 }}
+                className={cn(
+                  "w-full py-3 px-6 bg-gradient-to-r from-pink-500 to-purple-600 text-white text-base font-medium rounded-xl shadow-lg hover:from-pink-600 hover:to-purple-700 transition flex items-center justify-center gap-2",
+                  loading && "opacity-70 cursor-not-allowed"
+                )}
+              >
+                {loading && <Loader2 className="w-5 h-5 animate-spin" />}
+                {loading ? "Creating account..." : "Create Account"}
+              </motion.button>
+            </form>
+
+            {/* Footer */}
+            <motion.div
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4 }}
+              className="mt-6 text-center"
+            >
+              <p className="text-gray-300 text-sm">
+                Already have an account?{" "}
+                <Link
+                  href="/auth/login"
+                  className="text-pink-400 hover:text-pink-300 font-medium"
+                >
+                  Sign In
+                </Link>
+              </p>
+            </motion.div>
+          </motion.div>
         </div>
       </div>
     </div>

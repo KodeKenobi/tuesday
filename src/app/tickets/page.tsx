@@ -3,7 +3,24 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import DashboardLayout from "@/components/DashboardLayout";
-import { Plus, Filter } from "lucide-react";
+import {
+  Plus,
+  Filter,
+  Search,
+  Calendar,
+  User,
+  Building,
+  Clock,
+  MoreHorizontal,
+  Eye,
+  Edit,
+  Trash2,
+  CheckCircle,
+  AlertCircle,
+  Clock as ClockIcon,
+  Star,
+  Zap,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface Ticket {
@@ -28,20 +45,32 @@ interface Ticket {
   };
 }
 
-const statusColors = {
-  BACKLOG: "status-backlog",
-  IN_PROGRESS: "status-in-progress",
-  REVISIONS: "status-revisions",
-  CLIENT_REVIEW: "status-client-review",
-  COMPLETE: "status-complete",
-};
-
-const statusLabels = {
-  BACKLOG: "Backlog",
-  IN_PROGRESS: "In Progress",
-  REVISIONS: "Revisions",
-  CLIENT_REVIEW: "Client Review",
-  COMPLETE: "Complete",
+const statusConfig = {
+  BACKLOG: {
+    label: "Backlog",
+    color: "bg-gray-500/20 text-gray-400 border-gray-500/30",
+    icon: ClockIcon,
+  },
+  IN_PROGRESS: {
+    label: "In Progress",
+    color: "bg-blue-500/20 text-blue-400 border-blue-500/30",
+    icon: Zap,
+  },
+  REVISIONS: {
+    label: "Revisions",
+    color: "bg-yellow-500/20 text-yellow-400 border-yellow-500/30",
+    icon: AlertCircle,
+  },
+  CLIENT_REVIEW: {
+    label: "Client Review",
+    color: "bg-purple-500/20 text-purple-400 border-purple-500/30",
+    icon: Eye,
+  },
+  COMPLETE: {
+    label: "Complete",
+    color: "bg-green-500/20 text-green-400 border-green-500/30",
+    icon: CheckCircle,
+  },
 };
 
 export default function TicketsPage() {
@@ -50,6 +79,8 @@ export default function TicketsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
 
   useEffect(() => {
     fetchTickets();
@@ -103,168 +134,207 @@ export default function TicketsPage() {
     }
   };
 
+  const filteredTickets = tickets.filter(
+    (ticket) =>
+      ticket.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      ticket.client?.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      ticket.assignee?.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   if (!user) {
     return null;
   }
 
   return (
     <DashboardLayout>
-      <div className="max-w-7xl mx-auto">
+      <div className="max-w-7xl mx-auto space-y-6">
         {/* Header */}
-        <div className="flex items-center justify-between mb-8">
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
           <div>
             <h1 className="text-3xl font-bold text-white mb-2">All Tickets</h1>
-            <p className="text-[#B3B3B3]">View and manage all tickets</p>
+            <p className="text-gray-400">
+              Manage and track all your project tickets
+            </p>
           </div>
 
-          {user.role === "USER" && (
-            <button className="bg-gradient-to-r from-[#6366F1] to-[#8B5CF6] text-white px-6 py-3 rounded-lg hover:from-[#5B5BD6] hover:to-[#7C3AED] transition-all duration-200 flex items-center space-x-2">
-              <Plus className="w-5 h-5" />
-              <span>Create Ticket</span>
-            </button>
-          )}
+          <div className="flex items-center gap-3">
+            {user.role === "USER" && (
+              <button className="btn-primary flex items-center space-x-2">
+                <Plus className="w-4 h-4" />
+                <span>Create Ticket</span>
+              </button>
+            )}
+          </div>
         </div>
 
-        {/* Filters */}
-        <div className="bg-[#1E1E1E] rounded-xl p-6 mb-6 border border-[#2A2A2A]">
-          <div className="flex items-center space-x-4">
-            <Filter className="w-5 h-5 text-[#B3B3B3]" />
-            <span className="text-[#B3B3B3] font-medium">
-              Filter by status:
-            </span>
-            <select
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-              className="bg-[#2A2A2A] border border-[#3A3A3A] rounded-lg px-3 py-2 text-white focus:border-[#6366F1] focus:outline-none"
-            >
-              <option value="">All Statuses</option>
-              {Object.entries(statusLabels).map(([key, label]) => (
-                <option key={key} value={key}>
-                  {label}
-                </option>
-              ))}
-            </select>
+        {/* Search and Filters */}
+        <div className="bg-gray-900/50 backdrop-blur-xl rounded-2xl border border-gray-800/50 p-6">
+          <div className="flex flex-col lg:flex-row gap-4">
+            {/* Search */}
+            <div className="flex-1 relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+              <input
+                type="text"
+                placeholder="Search tickets, clients, or assignees..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full pl-10 pr-4 py-2 bg-gray-800/50 border border-gray-700/50 rounded-lg text-white placeholder-gray-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition-all"
+              />
+            </div>
+
+            {/* Status Filter */}
+            <div className="flex items-center space-x-3">
+              <Filter className="w-4 h-4 text-gray-400" />
+              <select
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}
+                className="bg-gray-800/50 border border-gray-700/50 rounded-lg px-3 py-2 text-white focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition-all"
+              >
+                <option value="">All Statuses</option>
+                {Object.entries(statusConfig).map(([key, config]) => (
+                  <option key={key} value={key}>
+                    {config.label}
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
+        </div>
+
+        {/* Stats */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+          {Object.entries(statusConfig).map(([status, config]) => {
+            const count = tickets.filter(
+              (ticket) => ticket.status === status
+            ).length;
+            const Icon = config.icon;
+            return (
+              <div
+                key={status}
+                className="bg-gray-900/50 backdrop-blur-xl rounded-xl border border-gray-800/50 p-4"
+              >
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-2xl font-bold text-white">{count}</p>
+                    <p className="text-sm text-gray-400">{config.label}</p>
+                  </div>
+                  <div className={cn("p-2 rounded-lg", config.color)}>
+                    <Icon className="w-4 h-4" />
+                  </div>
+                </div>
+              </div>
+            );
+          })}
         </div>
 
         {/* Error message */}
         {error && (
-          <div className="mb-6 p-4 bg-[#EF4444]/10 border border-[#EF4444]/20 rounded-lg">
-            <p className="text-[#EF4444]">{error}</p>
+          <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-4">
+            <p className="text-red-400">{error}</p>
           </div>
         )}
 
-        {/* Tickets list */}
+        {/* Tickets Grid/List */}
         {loading ? (
           <div className="flex items-center justify-center py-12">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#6366F1]"></div>
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-500"></div>
           </div>
-        ) : tickets.length === 0 ? (
+        ) : filteredTickets.length === 0 ? (
           <div className="text-center py-12">
-            <p className="text-[#B3B3B3] text-lg">No tickets found</p>
+            <div className="w-16 h-16 bg-gray-800/50 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Search className="w-8 h-8 text-gray-400" />
+            </div>
+            <p className="text-gray-400 text-lg">No tickets found</p>
+            <p className="text-gray-500 text-sm mt-2">
+              Try adjusting your search or filters
+            </p>
           </div>
         ) : (
-          <div className="bg-[#1E1E1E] rounded-xl border border-[#2A2A2A] overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead>
-                  <tr className="border-b border-[#2A2A2A]">
-                    <th className="text-left p-6 text-[#B3B3B3] font-medium">
-                      Title
-                    </th>
-                    <th className="text-left p-6 text-[#B3B3B3] font-medium">
-                      Status
-                    </th>
-                    <th className="text-left p-6 text-[#B3B3B3] font-medium">
-                      Client
-                    </th>
-                    <th className="text-left p-6 text-[#B3B3B3] font-medium">
-                      Assignee
-                    </th>
-                    <th className="text-left p-6 text-[#B3B3B3] font-medium">
-                      Created
-                    </th>
-                    {user.role === "USER" && (
-                      <th className="text-left p-6 text-[#B3B3B3] font-medium">
-                        Actions
-                      </th>
-                    )}
-                  </tr>
-                </thead>
-                <tbody>
-                  {tickets.map((ticket, index) => (
-                    <tr
-                      key={ticket.id}
-                      className={cn(
-                        "border-b border-[#2A2A2A] hover:bg-[#2A2A2A]/50 transition-colors",
-                        index % 2 === 0 ? "bg-[#1A1A1A]" : "bg-[#1E1E1E]"
-                      )}
-                    >
-                      <td className="p-6">
-                        <div>
-                          <p className="text-white font-medium">
-                            {ticket.title}
-                          </p>
-                          <p className="text-[#B3B3B3] text-sm">
-                            Created by {ticket.creator.name}
-                          </p>
-                        </div>
-                      </td>
-                      <td className="p-6">
+          <div
+            className={cn(
+              "space-y-4",
+              viewMode === "grid"
+                ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
+                : ""
+            )}
+          >
+            {filteredTickets.map((ticket) => {
+              const status =
+                statusConfig[ticket.status as keyof typeof statusConfig];
+              const StatusIcon = status.icon;
+
+              return (
+                <div
+                  key={ticket.id}
+                  className="bg-gray-900/50 backdrop-blur-xl rounded-xl border border-gray-800/50 p-6 hover:border-gray-700/50 transition-all duration-200 group"
+                >
+                  {/* Header */}
+                  <div className="flex items-start justify-between mb-4">
+                    <div className="flex-1">
+                      <h3 className="text-white font-semibold mb-1 group-hover:text-indigo-400 transition-colors">
+                        {ticket.title}
+                      </h3>
+                      <div className="flex items-center space-x-2">
                         <span
                           className={cn(
-                            "px-3 py-1 rounded-full text-xs font-medium",
-                            statusColors[
-                              ticket.status as keyof typeof statusColors
-                            ]
+                            "inline-flex items-center space-x-1 px-2 py-1 rounded-full text-xs font-medium border",
+                            status.color
                           )}
                         >
-                          {
-                            statusLabels[
-                              ticket.status as keyof typeof statusLabels
-                            ]
-                          }
+                          <StatusIcon className="w-3 h-3" />
+                          <span>{status.label}</span>
                         </span>
-                      </td>
-                      <td className="p-6">
-                        <p className="text-[#B3B3B3]">
-                          {ticket.client?.name || "No client"}
-                        </p>
-                      </td>
-                      <td className="p-6">
-                        <p className="text-[#B3B3B3]">
-                          {ticket.assignee?.name || "Unassigned"}
-                        </p>
-                      </td>
-                      <td className="p-6">
-                        <p className="text-[#B3B3B3] text-sm">
-                          {new Date(ticket.createdAt).toLocaleDateString()}
-                        </p>
-                      </td>
-                      {user.role === "USER" && (
-                        <td className="p-6">
-                          <select
-                            value={ticket.status}
-                            onChange={(e) =>
-                              handleStatusChange(ticket.id, e.target.value)
-                            }
-                            className="bg-[#2A2A2A] border border-[#3A3A3A] rounded-lg px-3 py-1 text-white text-sm focus:border-[#6366F1] focus:outline-none"
-                          >
-                            {Object.entries(statusLabels).map(
-                              ([key, label]) => (
-                                <option key={key} value={key}>
-                                  {label}
-                                </option>
-                              )
-                            )}
-                          </select>
-                        </td>
-                      )}
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                      </div>
+                    </div>
+
+                    {user.role === "USER" && (
+                      <button className="text-gray-400 hover:text-white transition-colors p-1">
+                        <MoreHorizontal className="w-4 h-4" />
+                      </button>
+                    )}
+                  </div>
+
+                  {/* Details */}
+                  <div className="space-y-3">
+                    <div className="flex items-center space-x-2 text-sm text-gray-400">
+                      <Building className="w-4 h-4" />
+                      <span>{ticket.client?.name || "No client"}</span>
+                    </div>
+
+                    <div className="flex items-center space-x-2 text-sm text-gray-400">
+                      <User className="w-4 h-4" />
+                      <span>{ticket.assignee?.name || "Unassigned"}</span>
+                    </div>
+
+                    <div className="flex items-center space-x-2 text-sm text-gray-400">
+                      <Calendar className="w-4 h-4" />
+                      <span>
+                        {new Date(ticket.createdAt).toLocaleDateString()}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Actions */}
+                  {user.role === "USER" && (
+                    <div className="mt-4 pt-4 border-t border-gray-800/50">
+                      <select
+                        value={ticket.status}
+                        onChange={(e) =>
+                          handleStatusChange(ticket.id, e.target.value)
+                        }
+                        className="w-full bg-gray-800/50 border border-gray-700/50 rounded-lg px-3 py-2 text-white text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition-all"
+                      >
+                        {Object.entries(statusConfig).map(([key, config]) => (
+                          <option key={key} value={key}>
+                            {config.label}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
           </div>
         )}
       </div>

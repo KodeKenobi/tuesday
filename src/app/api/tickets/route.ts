@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { getUserFromToken } from "@/lib/auth";
+import bcrypt from "bcryptjs";
 
 export async function GET(request: NextRequest) {
   try {
@@ -20,7 +21,7 @@ export async function GET(request: NextRequest) {
     const status = searchParams.get("status");
     const clientId = searchParams.get("clientId");
 
-    let where: any = {};
+    const where: Record<string, string | { clientId: string }> = {};
 
     if (status) {
       where.status = status;
@@ -65,7 +66,13 @@ export async function GET(request: NextRequest) {
       },
     });
 
-    return NextResponse.json(tickets);
+    // Parse tags from JSON string to array
+    const ticketsWithParsedTags = tickets.map((ticket) => ({
+      ...ticket,
+      tags: ticket.tags ? JSON.parse(ticket.tags) : [],
+    }));
+
+    return NextResponse.json(ticketsWithParsedTags);
   } catch (error) {
     console.error("Get tickets error:", error);
     return NextResponse.json(
@@ -91,22 +98,72 @@ export async function POST(request: NextRequest) {
 
     const {
       title,
+      description,
+      priority,
+      status = "BACKLOG",
+      assignee,
+      client,
+      estimatedHours,
+      tags,
       clientId,
       assigneeId,
-      status = "BACKLOG",
     } = await request.json();
 
     if (!title) {
       return NextResponse.json({ error: "Title is required" }, { status: 400 });
     }
 
+    // Convert tags array to JSON string for storage
+    const tagsString = tags && tags.length > 0 ? JSON.stringify(tags) : null;
+
+    // Handle assignee - if it's a string name, create a new user
+    let finalAssigneeId = assigneeId;
+    if (assignee && !assigneeId) {
+      try {
+        // Create a new user with the provided name
+        const newUser = await db.user.create({
+          data: {
+            name: assignee,
+            email: `${assignee.toLowerCase().replace(/\s+/g, ".")}@example.com`,
+            password: await bcrypt.hash("temp123", 10), // Temporary password
+            role: "USER",
+          },
+        });
+        finalAssigneeId = newUser.id;
+      } catch (error) {
+        console.error("Error creating assignee user:", error);
+      }
+    }
+
+    // Handle client - if it's a string name, create a new client
+    let finalClientId = clientId;
+    if (client && !clientId) {
+      try {
+        // Create a new client with the provided name
+        const newClient = await db.client.create({
+          data: {
+            name: client,
+            email: `${client.toLowerCase().replace(/\s+/g, ".")}@example.com`,
+            isInvited: false,
+          },
+        });
+        finalClientId = newClient.id;
+      } catch (error) {
+        console.error("Error creating client:", error);
+      }
+    }
+
     const ticket = await db.ticket.create({
       data: {
         title,
+        description,
+        priority: priority || "MEDIUM",
         status,
+        estimatedHours: estimatedHours ? parseFloat(estimatedHours) : null,
+        tags: tagsString,
         creatorId: user.id,
-        clientId: clientId || null,
-        assigneeId: assigneeId || null,
+        clientId: finalClientId || null,
+        assigneeId: finalAssigneeId || null,
       },
       include: {
         creator: {
@@ -133,7 +190,13 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    return NextResponse.json(ticket);
+    // Parse tags for response
+    const ticketWithParsedTags = {
+      ...ticket,
+      tags: ticket.tags ? JSON.parse(ticket.tags) : [],
+    };
+
+    return NextResponse.json(ticketWithParsedTags);
   } catch (error) {
     console.error("Create ticket error:", error);
     return NextResponse.json(
