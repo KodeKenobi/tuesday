@@ -14,7 +14,7 @@ interface Client {
 interface CreateTicketModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (ticketData: any) => void;
+  onSubmit: (ticketData: { title: string; status: string; clientId?: string }) => void;
 }
 
 const statusOptions = [
@@ -81,7 +81,7 @@ export default function CreateTicketModal({
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsSubmitting(true);
 

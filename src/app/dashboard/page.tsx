@@ -131,7 +131,7 @@ export default function DashboardPage() {
     }
   };
 
-  const handleCreateTicket = async (ticketData: any) => {
+  const handleCreateTicket = async (ticketData: { title: string; status: string; clientId?: string }) => {
     try {
       console.log("Creating ticket with data:", ticketData);
       const response = await fetch("/api/tickets", {
@@ -180,7 +180,7 @@ export default function DashboardPage() {
           <div>
             <h1 className="text-3xl font-bold text-white mb-2">Dashboard</h1>
             <p className="text-gray-400">
-              Welcome back, {user.name}. Here's what's happening today.
+              Welcome back, {user.name}. Here&apos;s what&apos;s happening today.
             </p>
           </div>
 

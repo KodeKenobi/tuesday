@@ -67,7 +67,7 @@ async function seedDatabase() {
         return prisma.ticket.create({
           data: {
             title: ticket.title,
-            status: ticket.status as any,
+            status: ticket.status as "BACKLOG" | "IN_PROGRESS" | "REVISIONS" | "CLIENT_REVIEW" | "COMPLETE",
             creatorId: creator.id,
             assigneeId: assignee.id,
             clientId: client.id,

@@ -4,8 +4,9 @@ import { getUserFromRequest } from "@/lib/auth";
 
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params;
   try {
     const user = await getUserFromRequest(request);
 
@@ -16,7 +17,7 @@ export async function PATCH(
     const { status } = await request.json();
 
     const ticket = await db.ticket.update({
-      where: { id: params.id },
+      where: { id },
       data: { status },
       include: {
         creator: {
