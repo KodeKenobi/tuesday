@@ -10,7 +10,6 @@ import {
   Ticket,
   Users,
   Search,
-  Bell,
   Plus,
   LogOut,
   Menu,
@@ -21,12 +20,7 @@ import {
   Zap,
   TrendingUp,
   Calendar,
-  FileText,
-  MessageSquare,
-  Star,
-  Filter,
-  Grid,
-  List,
+  Power,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -35,47 +29,20 @@ interface DashboardLayoutProps {
 }
 
 const navigation = [
-  { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard, badge: null },
-  { name: "Workload", href: "/workload", icon: Briefcase, badge: "3" },
-  { name: "Tickets", href: "/tickets", icon: Ticket, badge: "12" },
-  { name: "Clients", href: "/clients", icon: Users, badge: null },
+  { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
+  { name: "Workload", href: "/workload", icon: Briefcase },
+  { name: "Tickets", href: "/tickets", icon: Ticket },
+  { name: "Clients", href: "/clients", icon: Users },
 ];
 
 const quickActions = [
   { name: "New Ticket", icon: Plus, href: "/tickets/new" },
   { name: "New Client", icon: Users, href: "/clients/new" },
-  { name: "Reports", icon: TrendingUp, href: "/reports" },
-  { name: "Calendar", icon: Calendar, href: "/calendar" },
-];
-
-const notifications = [
-  {
-    id: 1,
-    title: "New ticket assigned",
-    description: "Website redesign project has been assigned to you",
-    time: "2 minutes ago",
-    unread: true,
-  },
-  {
-    id: 2,
-    title: "Client feedback received",
-    description: "John Smith left feedback on logo design",
-    time: "1 hour ago",
-    unread: true,
-  },
-  {
-    id: 3,
-    title: "Project completed",
-    description: "E-commerce website project marked as complete",
-    time: "3 hours ago",
-    unread: false,
-  },
 ];
 
 export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [showNotifications, setShowNotifications] = useState(false);
   const [showQuickActions, setShowQuickActions] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
   const { user, logout } = useAuth();
@@ -90,7 +57,6 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchQuery.trim()) {
-      // Implement search functionality
       console.log("Searching for:", searchQuery);
     }
   };
@@ -118,7 +84,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
               <div className="w-8 h-8 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-lg flex items-center justify-center">
                 <Zap className="w-5 h-5 text-white" />
               </div>
-              <h1 className="text-xl font-bold text-white">Tuesday</h1>
+              <h1 className="text-xl font-bold text-white">ClickDown</h1>
             </div>
             <button
               onClick={() => setSidebarOpen(false)}
@@ -150,7 +116,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                   key={item.name}
                   href={item.href}
                   className={cn(
-                    "flex items-center justify-between px-3 py-2 rounded-lg transition-all duration-200 group",
+                    "flex items-center px-3 py-2 rounded-lg transition-all duration-200 group",
                     isActive
                       ? "bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg"
                       : "text-gray-400 hover:text-white hover:bg-gray-800/50"
@@ -161,18 +127,6 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                     <item.icon className="w-5 h-5" />
                     <span className="font-medium">{item.name}</span>
                   </div>
-                  {item.badge && (
-                    <span
-                      className={cn(
-                        "px-2 py-1 text-xs font-medium rounded-full",
-                        isActive
-                          ? "bg-white/20 text-white"
-                          : "bg-indigo-500/20 text-indigo-400"
-                      )}
-                    >
-                      {item.badge}
-                    </span>
-                  )}
                 </Link>
               );
             })}
@@ -210,7 +164,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
               <div className="w-8 h-8 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-lg flex items-center justify-center">
                 <Zap className="w-5 h-5 text-white" />
               </div>
-              <h1 className="text-xl font-bold text-white">Tuesday</h1>
+              <h1 className="text-xl font-bold text-white">ClickDown</h1>
             </div>
           </div>
 
@@ -236,7 +190,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                   key={item.name}
                   href={item.href}
                   className={cn(
-                    "flex items-center justify-between px-3 py-2 rounded-lg transition-all duration-200 group",
+                    "flex items-center px-3 py-2 rounded-lg transition-all duration-200 group",
                     isActive
                       ? "bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg"
                       : "text-gray-400 hover:text-white hover:bg-gray-800/50"
@@ -246,18 +200,6 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                     <item.icon className="w-5 h-5" />
                     <span className="font-medium">{item.name}</span>
                   </div>
-                  {item.badge && (
-                    <span
-                      className={cn(
-                        "px-2 py-1 text-xs font-medium rounded-full",
-                        isActive
-                          ? "bg-white/20 text-white"
-                          : "bg-indigo-500/20 text-indigo-400"
-                      )}
-                    >
-                      {item.badge}
-                    </span>
-                  )}
                 </Link>
               );
             })}
@@ -285,23 +227,23 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
 
             {/* User Menu Dropdown */}
             {showUserMenu && (
-              <div className="absolute bottom-20 left-4 right-4 bg-gray-800/95 backdrop-blur-xl rounded-lg border border-gray-700/50 shadow-xl">
-                <div className="p-2 space-y-1">
-                  <button className="w-full flex items-center space-x-3 px-3 py-2 text-sm text-gray-300 hover:text-white hover:bg-gray-700/50 rounded-lg transition-colors">
-                    <User className="w-4 h-4" />
-                    <span>Profile</span>
+              <div className="absolute bottom-20 left-4 right-4 bg-gray-900/95 backdrop-blur-xl rounded-2xl border border-gray-800/50 shadow-2xl">
+                <div className="p-3 space-y-2">
+                  <button className="w-full flex items-center space-x-3 px-4 py-3 text-sm text-gray-300 hover:text-white hover:bg-gradient-to-r hover:from-indigo-500/10 hover:to-purple-500/10 rounded-xl transition-all duration-200 group">
+                    <User className="w-4 h-4 group-hover:scale-110 transition-transform" />
+                    <span className="font-medium">Profile</span>
                   </button>
-                  <button className="w-full flex items-center space-x-3 px-3 py-2 text-sm text-gray-300 hover:text-white hover:bg-gray-700/50 rounded-lg transition-colors">
-                    <Settings className="w-4 h-4" />
-                    <span>Settings</span>
+                  <button className="w-full flex items-center space-x-3 px-4 py-3 text-sm text-gray-300 hover:text-white hover:bg-gradient-to-r hover:from-indigo-500/10 hover:to-purple-500/10 rounded-xl transition-all duration-200 group">
+                    <Settings className="w-4 h-4 group-hover:scale-110 transition-transform" />
+                    <span className="font-medium">Settings</span>
                   </button>
-                  <hr className="border-gray-700/50" />
+                  <div className="h-px bg-gradient-to-r from-transparent via-gray-700/50 to-transparent my-2"></div>
                   <button
                     onClick={handleLogout}
-                    className="w-full flex items-center space-x-3 px-3 py-2 text-sm text-red-400 hover:text-red-300 hover:bg-red-500/10 rounded-lg transition-colors"
+                    className="w-full flex items-center space-x-3 px-4 py-3 text-sm text-red-400 hover:text-red-300 hover:bg-gradient-to-r hover:from-red-500/10 hover:to-pink-500/10 rounded-xl transition-all duration-200 group"
                   >
-                    <LogOut className="w-4 h-4" />
-                    <span>Logout</span>
+                    <Power className="w-4 h-4 group-hover:scale-110 transition-transform" />
+                    <span className="font-medium">Sign Out</span>
                   </button>
                 </div>
               </div>
@@ -370,21 +312,21 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                 </button>
 
                 {showQuickActions && (
-                  <div className="absolute right-0 top-12 w-64 bg-gray-800/95 backdrop-blur-xl rounded-lg border border-gray-700/50 shadow-xl z-50">
-                    <div className="p-2">
-                      <h3 className="px-3 py-2 text-sm font-medium text-gray-400">
+                  <div className="absolute right-0 top-12 w-64 bg-gray-900/95 backdrop-blur-xl rounded-2xl border border-gray-800/50 shadow-2xl z-50">
+                    <div className="p-3">
+                      <h3 className="px-4 py-2 text-sm font-medium text-gray-400 mb-2">
                         Quick Actions
                       </h3>
-                      <div className="space-y-1">
+                      <div className="space-y-2">
                         {quickActions.map((action) => (
                           <Link
                             key={action.name}
                             href={action.href}
-                            className="flex items-center space-x-3 px-3 py-2 text-sm text-gray-300 hover:text-white hover:bg-gray-700/50 rounded-lg transition-colors"
+                            className="flex items-center space-x-3 px-4 py-3 text-sm text-gray-300 hover:text-white hover:bg-gradient-to-r hover:from-indigo-500/10 hover:to-purple-500/10 rounded-xl transition-all duration-200 group"
                             onClick={() => setShowQuickActions(false)}
                           >
-                            <action.icon className="w-4 h-4" />
-                            <span>{action.name}</span>
+                            <action.icon className="w-4 h-4 group-hover:scale-110 transition-transform" />
+                            <span className="font-medium">{action.name}</span>
                           </Link>
                         ))}
                       </div>
@@ -412,71 +354,6 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                   />
                 </svg>
               </button>
-
-              {/* Notifications */}
-              <div className="relative">
-                <button
-                  onClick={() => setShowNotifications(!showNotifications)}
-                  className="relative text-gray-400 hover:text-white transition-colors p-2 hover:bg-gray-800/50 rounded-lg"
-                  title="Notifications"
-                >
-                  <Bell className="w-5 h-5" />
-                  <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full animate-pulse"></span>
-                </button>
-
-                {showNotifications && (
-                  <div className="absolute right-0 top-12 w-80 bg-gray-800/95 backdrop-blur-xl rounded-lg border border-gray-700/50 shadow-xl z-50">
-                    <div className="p-4 border-b border-gray-700/50">
-                      <div className="flex items-center justify-between">
-                        <h3 className="text-sm font-medium text-white">
-                          Notifications
-                        </h3>
-                        <button className="text-xs text-indigo-400 hover:text-indigo-300">
-                          Mark all read
-                        </button>
-                      </div>
-                    </div>
-                    <div className="max-h-96 overflow-y-auto">
-                      {notifications.map((notification) => (
-                        <div
-                          key={notification.id}
-                          className={cn(
-                            "p-4 border-b border-gray-700/30 hover:bg-gray-700/30 transition-colors cursor-pointer",
-                            notification.unread && "bg-indigo-500/10"
-                          )}
-                        >
-                          <div className="flex items-start space-x-3">
-                            <div
-                              className={cn(
-                                "w-2 h-2 rounded-full mt-2 flex-shrink-0",
-                                notification.unread
-                                  ? "bg-indigo-500"
-                                  : "bg-gray-600"
-                              )}
-                            ></div>
-                            <div className="flex-1 min-w-0">
-                              <p className="text-sm font-medium text-white">
-                                {notification.title}
-                              </p>
-                              <p className="text-xs text-gray-400 mt-1">
-                                {notification.description}
-                              </p>
-                              <p className="text-xs text-gray-500 mt-2">
-                                {notification.time}
-                              </p>
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                    <div className="p-4 border-t border-gray-700/50">
-                      <button className="w-full text-center text-sm text-indigo-400 hover:text-indigo-300">
-                        View all notifications
-                      </button>
-                    </div>
-                  </div>
-                )}
-              </div>
 
               {/* User Menu (Desktop) */}
               <div className="hidden lg:flex items-center space-x-4">
@@ -510,6 +387,15 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                     <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-gray-600 rounded-full border-2 border-gray-900 group-hover:bg-gray-500 transition-colors"></div>
                   </button>
                 </div>
+
+                {/* Logout Button */}
+                <button
+                  onClick={handleLogout}
+                  className="text-gray-400 hover:text-white transition-all duration-200 p-2 hover:bg-gray-800/50 rounded-lg hover:shadow-lg"
+                  title="Sign Out"
+                >
+                  <Power className="w-5 h-5" />
+                </button>
               </div>
             </div>
           </div>
@@ -520,11 +406,10 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
       </div>
 
       {/* Backdrop for dropdowns */}
-      {(showNotifications || showQuickActions || showUserMenu) && (
+      {(showQuickActions || showUserMenu) && (
         <div
           className="fixed inset-0 z-30"
           onClick={() => {
-            setShowNotifications(false);
             setShowQuickActions(false);
             setShowUserMenu(false);
           }}

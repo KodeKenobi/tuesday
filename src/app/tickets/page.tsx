@@ -74,7 +74,7 @@ const statusConfig = {
 };
 
 export default function TicketsPage() {
-  const { user, token } = useAuth();
+  const { user } = useAuth();
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -93,11 +93,7 @@ export default function TicketsPage() {
         params.append("status", statusFilter);
       }
 
-      const response = await fetch(`/api/tickets?${params}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const response = await fetch(`/api/tickets?${params}`);
 
       if (!response.ok) {
         throw new Error("Failed to fetch tickets");
@@ -118,7 +114,6 @@ export default function TicketsPage() {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({ status: newStatus }),
       });
@@ -199,32 +194,6 @@ export default function TicketsPage() {
               </select>
             </div>
           </div>
-        </div>
-
-        {/* Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-          {Object.entries(statusConfig).map(([status, config]) => {
-            const count = tickets.filter(
-              (ticket) => ticket.status === status
-            ).length;
-            const Icon = config.icon;
-            return (
-              <div
-                key={status}
-                className="bg-gray-900/50 backdrop-blur-xl rounded-xl border border-gray-800/50 p-4"
-              >
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-2xl font-bold text-white">{count}</p>
-                    <p className="text-sm text-gray-400">{config.label}</p>
-                  </div>
-                  <div className={cn("p-2 rounded-lg", config.color)}>
-                    <Icon className="w-4 h-4" />
-                  </div>
-                </div>
-              </div>
-            );
-          })}
         </div>
 
         {/* Error message */}

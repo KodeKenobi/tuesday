@@ -31,6 +31,8 @@ a {
 /* Custom scrollbar */
 ::-webkit-scrollbar {
   width: 8px;
+  opacity: 0;
+  transition: opacity 0.3s ease;
 }
 
 ::-webkit-scrollbar-track {
@@ -46,10 +48,35 @@ a {
   background: var(--primary);
 }
 
+/* Hide scrollbar by default */
+html,
+body {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+html::-webkit-scrollbar,
+body::-webkit-scrollbar {
+  display: none;
+}
+
+/* Show scrollbar when scrolling */
+.scrolling,
+.scrolling html,
+.scrolling body {
+  scrollbar-width: auto;
+  -ms-overflow-style: auto;
+}
+
+.scrolling::-webkit-scrollbar,
+.scrolling html::-webkit-scrollbar,
+.scrolling body::-webkit-scrollbar {
+  display: block;
+}
+
 /* Focus styles */
 *:focus {
-  outline: 2px solid var(--primary);
-  outline-offset: 2px;
+  outline: none;
 }
 
 /* Status colors */
@@ -294,4 +321,38 @@ a {
   .no-print {
     display: none !important;
   }
+}
+
+/* Scroll indicator styles */
+.scroll-indicator {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  z-index: 50;
+  opacity: 0;
+  transform: translateY(20px);
+  transition: all 0.3s ease;
+  pointer-events: none;
+}
+
+.scrolling .scroll-indicator {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+.scroll-indicator-icon {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  padding: 0.75rem;
+  color: white;
+  transition: all 0.2s ease;
+}
+
+.scroll-indicator-icon:hover {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.3);
+  transform: scale(1.1);
 }

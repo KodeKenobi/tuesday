@@ -1,40 +1,14 @@
-# Tuesday - Ticket Management MVP
+# ClickDown - Ticket Management MVP
 
-A simple, elegant ticket management system built with Next.js, TypeScript, and Prisma.
+A simple, elegant ticket management system built with Next.js, TypeScript, and Prisma. This MVP is designed to test basic CRUD capabilities, user role handling, simple status workflows, clean UI design, and developer understanding of permissions and flows.
 
-## 🎯 Features
+## 🎯 Core Features (Nothing More)
 
-### Authentication
-
-- User and Client login/signup
-- Role-based access control
-- JWT token authentication
-
-### User Dashboard
-
-- View all tickets with filtering by status
-- Create new tickets
-- Update ticket status
-- Manage client relationships
-
-### Client Portal
-
-- View assigned tickets
-- Mark tickets as complete
-- Request revisions
-- Simple, focused interface
-
-### Ticket Management
-
-- 5 status workflow: Backlog → In Progress → Client Review → Complete/Revisions
-- Minimal ticket fields: Title, Client, Status
-- Status transitions with role-based permissions
-
-### Client Management
-
-- Create client records
-- Optional invitation system
-- Client profile management
+- ✅ **Dashboard** - View all tickets with filtering
+- ✅ **Tickets** - Minimal fields (Title, Client, Status only)
+- ✅ **5 Simple Statuses** - Backlog, In Progress, Revisions, Client Review, Complete
+- ✅ **Client Portal** - Login and ticket management for clients
+- ✅ **User Authentication** - Simple email/password with role-based access
 
 ## 🚀 Getting Started
 
@@ -49,7 +23,7 @@ A simple, elegant ticket management system built with Next.js, TypeScript, and P
 
 ```bash
 git clone <repository-url>
-cd tuesday
+cd ClickDown
 ```
 
 2. Install dependencies
@@ -79,7 +53,7 @@ npm run dev
 - **Frontend**: Next.js 15, React 19, TypeScript
 - **Styling**: Tailwind CSS with custom dark theme
 - **Database**: SQLite with Prisma ORM
-- **Authentication**: JWT tokens with bcrypt
+- **Authentication**: Cookie-based sessions
 - **Icons**: Lucide React
 
 ### Project Structure
@@ -88,6 +62,9 @@ npm run dev
 src/
 ├── app/                    # Next.js app router
 │   ├── api/               # API routes
+│   │   ├── auth/          # Authentication endpoints
+│   │   ├── tickets/       # Ticket management
+│   │   └── clients/       # Client management
 │   ├── auth/              # Authentication pages
 │   ├── dashboard/         # User dashboard
 │   ├── workload/          # User workload view
@@ -96,40 +73,37 @@ src/
 │   └── client/            # Client portal
 ├── components/            # Reusable components
 ├── contexts/              # React contexts
-├── lib/                   # Utility functions
-└── middleware.ts          # Authentication middleware
+└── lib/                   # Utility functions
 ```
 
 ## 🎨 Design System
 
 ### Color Palette
 
-- **Background**: #121212 (Dark)
-- **Surface**: #1E1E1E (Cards/Panels)
-- **Primary**: #6366F1 (Indigo)
-- **Secondary**: #F472B6 (Pink)
-- **Text**: #FFFFFF (Primary), #B3B3B3 (Secondary)
-
-### Status Colors
-
-- **Backlog**: Gray (#6B7280)
-- **In Progress**: Blue (#3B82F6)
-- **Revisions**: Yellow (#FACC15)
-- **Client Review**: Purple (#8B5CF6)
-- **Complete**: Green (#22C55E)
+- **Background**: Dark theme with glass morphism
+- **Primary**: Indigo (#6366F1)
+- **Secondary**: Purple (#8B5CF6)
+- **Status Colors**:
+  - **Backlog**: Gray (#6B7280)
+  - **In Progress**: Blue (#3B82F6)
+  - **Revisions**: Yellow (#FACC15)
+  - **Client Review**: Purple (#8B5CF6)
+  - **Complete**: Green (#22C55E)
 
 ## 🔐 Authentication
 
 ### User Roles
 
-- **USER**: Agency/Editor with full access
-- **CLIENT**: Client with limited access to assigned tickets
+- **USER**: Agency/Editor with full access to create and manage tickets
+- **CLIENT**: Client with limited access to assigned tickets only
 
 ### API Endpoints
 
 - `POST /api/auth/login` - User login
 - `POST /api/auth/signup` - User registration
-- `GET /api/tickets` - List tickets
+- `POST /api/auth/logout` - User logout
+- `GET /api/auth/me` - Get current user
+- `GET /api/tickets` - List tickets (filtered by role)
 - `POST /api/tickets` - Create ticket
 - `PATCH /api/tickets/:id` - Update ticket status
 - `GET /api/clients` - List clients
@@ -137,36 +111,79 @@ src/
 
 ## 📋 Ticket Workflow
 
-1. **Backlog** - New tickets start here
-2. **In Progress** - Work has begun
-3. **Client Review** - Ready for client feedback
-4. **Complete** - Client approved
-5. **Revisions** - Client requested changes
+### Ticket Fields
+
+- **Title** (required)
+- **Client** (optional, must be invited)
+- **Status** (defaults to Backlog)
 
 ### Status Transitions
 
-- Users can move tickets between any status
-- Clients can only mark tickets as Complete or request Revisions
-- Automatic filtering based on user role
+1. **Backlog** → **In Progress**
+2. **In Progress** → **Client Review**
+3. **Client Review** → **Complete** or **Revisions** (set by client)
+4. **Revisions** → **In Progress**
+5. **In Progress** → **Complete** (if no client assigned)
+
+### Role-Based Permissions
+
+- **Users** can move tickets between any status
+- **Clients** can only mark tickets as Complete or request Revisions when in Client Review status
+- **Clients** cannot edit or delete tickets
+
+## 🎯 Page Descriptions
+
+### Dashboard (User)
+
+- Shows all tickets in column view (Title, Status, Client)
+- Quick "Create Ticket" button
+- Filter by status
+- No metrics, no notifications
+
+### Workload (User)
+
+- Shows tickets assigned to the current user or created by them
+- List view by status
+- Filter by status
+- No additional widgets
+
+### Tickets (User)
+
+- Grid/list view of all tickets
+- Create new tickets
+- Update ticket status
+- Assign tickets to invited clients
+
+### Clients (User)
+
+- Manage client records (Name, Email)
+- Optional invitation system
+- Non-invited clients exist for filtering only
+
+### Client Portal
+
+- Login screen for clients
+- View only tickets assigned to their company
+- Mark tickets as Complete or request Revisions
+- Cannot edit or delete tickets
 
 ## 🎯 MVP Goals
 
 This MVP demonstrates:
 
-- ✅ Clean authentication system
-- ✅ Role-based permissions
-- ✅ Simple ticket workflow
+- ✅ Clean authentication system with role-based access
+- ✅ Simple ticket workflow with 5 statuses
 - ✅ Client portal functionality
-- ✅ Modern, dark UI design
+- ✅ Modern, dark UI design inspired by ClickUp
 - ✅ Responsive layout
 - ✅ TypeScript implementation
-- ✅ Database integration
+- ✅ Database integration with Prisma
 
 ## 🚧 Development
 
 ### Database Schema
 
-The system uses Prisma with SQLite for simplicity:
+The system uses Prisma with SQLite:
 
 - **User**: Authentication and role management
 - **Client**: Client records and invitation status
@@ -174,29 +191,27 @@ The system uses Prisma with SQLite for simplicity:
 
 ### Key Components
 
-- `AuthContext`: Global authentication state
-- `DashboardLayout`: Main navigation and layout
-- Status management with role-based permissions
-- Responsive design with mobile support
+- **DashboardLayout**: Main layout with sidebar navigation
+- **CreateTicketModal**: Modal for creating new tickets
+- **TicketDetailModal**: Modal for viewing ticket details
+- **KanbanBoard**: Drag-and-drop ticket management
+- **AuthContext**: Global authentication state
 
 ## 📝 Notes
 
-This is a test project designed to evaluate:
+- This is intentionally a "dirt simple" MVP for testing purposes
+- No complex features like descriptions, comments, attachments, or activity logs
+- Focus is on clean code structure and basic CRUD operations
+- UI design follows modern dark theme patterns
+- All authentication is cookie-based for simplicity
 
-- Code structure and organization
-- UI/UX implementation
-- Basic CRUD operations
-- Role-based access control
-- State management
-- API design
+## 🎯 Acceptance Criteria
 
-The system intentionally keeps features minimal to focus on core functionality and clean implementation.
-
-🧪 Test the Login
-You can now test the login functionality without any React errors:
-For User Dashboard:
-Email: test@example.com
-Password: password123
-For Client Dashboard:
-Email: client@example.com
-Password: password123
+- ✅ Clean login system with User and Client roles
+- ✅ User dashboard showing tickets
+- ✅ Ability to create tickets with just title, client, and status
+- ✅ Ability to create clients
+- ✅ Client dashboard to see their tickets
+- ✅ Clients can mark tickets Complete or Needs Revisions
+- ✅ 5 statuses with basic transitions
+- ✅ No metrics, no notifications

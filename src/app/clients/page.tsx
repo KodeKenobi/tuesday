@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import DashboardLayout from "@/components/DashboardLayout";
-import { Plus, Mail, User, X } from "lucide-react";
+import { Plus, Mail, User, X, CheckCircle, XCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface Client {
@@ -15,7 +15,7 @@ interface Client {
 }
 
 export default function ClientsPage() {
-  const { user, token } = useAuth();
+  const { user } = useAuth();
   const [clients, setClients] = useState<Client[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -32,11 +32,7 @@ export default function ClientsPage() {
 
   const fetchClients = async () => {
     try {
-      const response = await fetch("/api/clients", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const response = await fetch("/api/clients");
 
       if (!response.ok) {
         throw new Error("Failed to fetch clients");
@@ -59,7 +55,6 @@ export default function ClientsPage() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify(newClient),
       });
@@ -69,11 +64,8 @@ export default function ClientsPage() {
         throw new Error(error.error || "Failed to create client");
       }
 
-      // Reset form and close modal
       setNewClient({ name: "", email: "", isInvited: false });
       setShowCreateModal(false);
-
-      // Refresh clients
       fetchClients();
     } catch (error) {
       setError(
@@ -86,8 +78,8 @@ export default function ClientsPage() {
     return (
       <DashboardLayout>
         <div className="text-center py-12">
-          <p className="text-[#B3B3B3] text-lg">Access denied</p>
-          <p className="text-[#B3B3B3] text-sm mt-2">
+          <p className="text-gray-400 text-lg">Access denied</p>
+          <p className="text-gray-400 text-sm mt-2">
             Only users can access this page
           </p>
         </div>
@@ -97,61 +89,64 @@ export default function ClientsPage() {
 
   return (
     <DashboardLayout>
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between mb-8">
           <div>
             <h1 className="text-3xl font-bold text-white mb-2">Clients</h1>
-            <p className="text-[#B3B3B3]">Manage your client relationships</p>
+            <p className="text-gray-400">Manage your client relationships</p>
           </div>
 
           <button
             onClick={() => setShowCreateModal(true)}
-            className="bg-gradient-to-r from-[#6366F1] to-[#8B5CF6] text-white px-6 py-3 rounded-lg hover:from-[#5B5BD6] hover:to-[#7C3AED] transition-all duration-200 flex items-center space-x-2"
+            className="btn-primary flex items-center space-x-2"
           >
             <Plus className="w-5 h-5" />
             <span>Add Client</span>
           </button>
         </div>
 
-        {/* Error message */}
         {error && (
-          <div className="mb-6 p-4 bg-[#EF4444]/10 border border-[#EF4444]/20 rounded-lg">
-            <p className="text-[#EF4444]">{error}</p>
+          <div className="mb-6 p-4 bg-red-500/10 border border-red-500/20 rounded-lg">
+            <p className="text-red-400">{error}</p>
           </div>
         )}
 
-        {/* Clients list */}
         {loading ? (
           <div className="flex items-center justify-center py-12">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#6366F1]"></div>
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-500"></div>
           </div>
         ) : clients.length === 0 ? (
           <div className="text-center py-12">
-            <p className="text-[#B3B3B3] text-lg">No clients found</p>
+            <div className="w-16 h-16 bg-gray-800/50 rounded-full flex items-center justify-center mx-auto mb-4">
+              <User className="w-8 h-8 text-gray-400" />
+            </div>
+            <p className="text-gray-400 text-lg mb-2">No clients found</p>
+            <p className="text-gray-500 text-sm mb-6">
+              Get started by adding your first client
+            </p>
             <button
               onClick={() => setShowCreateModal(true)}
-              className="mt-4 bg-gradient-to-r from-[#6366F1] to-[#8B5CF6] text-white px-6 py-3 rounded-lg hover:from-[#5B5BD6] hover:to-[#7C3AED] transition-all duration-200"
+              className="btn-primary"
             >
               Add your first client
             </button>
           </div>
         ) : (
-          <div className="bg-[#1E1E1E] rounded-xl border border-[#2A2A2A] overflow-hidden">
+          <div className="bg-gray-900/95 backdrop-blur-xl rounded-2xl border border-gray-800/50 shadow-2xl overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead>
-                  <tr className="border-b border-[#2A2A2A]">
-                    <th className="text-left p-6 text-[#B3B3B3] font-medium">
+                  <tr className="border-b border-gray-800/50">
+                    <th className="text-left p-6 text-gray-400 font-medium">
                       Name
                     </th>
-                    <th className="text-left p-6 text-[#B3B3B3] font-medium">
+                    <th className="text-left p-6 text-gray-400 font-medium">
                       Email
                     </th>
-                    <th className="text-left p-6 text-[#B3B3B3] font-medium">
+                    <th className="text-left p-6 text-gray-400 font-medium">
                       Status
                     </th>
-                    <th className="text-left p-6 text-[#B3B3B3] font-medium">
+                    <th className="text-left p-6 text-gray-400 font-medium">
                       Created
                     </th>
                   </tr>
@@ -161,13 +156,13 @@ export default function ClientsPage() {
                     <tr
                       key={client.id}
                       className={cn(
-                        "border-b border-[#2A2A2A] hover:bg-[#2A2A2A]/50 transition-colors",
-                        index % 2 === 0 ? "bg-[#1A1A1A]" : "bg-[#1E1E1E]"
+                        "border-b border-gray-800/50 hover:bg-gray-800/30 transition-colors",
+                        index % 2 === 0 ? "bg-gray-900/50" : "bg-gray-900/30"
                       )}
                     >
                       <td className="p-6">
                         <div className="flex items-center space-x-3">
-                          <div className="w-10 h-10 bg-[#6366F1] rounded-full flex items-center justify-center">
+                          <div className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-lg flex items-center justify-center">
                             <User className="w-5 h-5 text-white" />
                           </div>
                           <div>
@@ -179,24 +174,31 @@ export default function ClientsPage() {
                       </td>
                       <td className="p-6">
                         <div className="flex items-center space-x-2">
-                          <Mail className="w-4 h-4 text-[#B3B3B3]" />
-                          <p className="text-[#B3B3B3]">{client.email}</p>
+                          <Mail className="w-4 h-4 text-gray-400" />
+                          <p className="text-gray-300">{client.email}</p>
                         </div>
                       </td>
                       <td className="p-6">
-                        <span
-                          className={cn(
-                            "px-3 py-1 rounded-full text-xs font-medium",
-                            client.isInvited
-                              ? "bg-[#22C55E] text-white"
-                              : "bg-[#6B7280] text-white"
+                        <div className="flex items-center space-x-2">
+                          {client.isInvited ? (
+                            <CheckCircle className="w-4 h-4 text-green-400" />
+                          ) : (
+                            <XCircle className="w-4 h-4 text-gray-400" />
                           )}
-                        >
-                          {client.isInvited ? "Invited" : "Not Invited"}
-                        </span>
+                          <span
+                            className={cn(
+                              "px-3 py-1 rounded-full text-xs font-medium",
+                              client.isInvited
+                                ? "bg-green-500/20 text-green-400 border border-green-500/30"
+                                : "bg-gray-500/20 text-gray-400 border border-gray-500/30"
+                            )}
+                          >
+                            {client.isInvited ? "Invited" : "Not Invited"}
+                          </span>
+                        </div>
                       </td>
                       <td className="p-6">
-                        <p className="text-[#B3B3B3] text-sm">
+                        <p className="text-gray-400 text-sm">
                           {new Date(client.createdAt).toLocaleDateString()}
                         </p>
                       </td>
@@ -208,64 +210,71 @@ export default function ClientsPage() {
           </div>
         )}
 
-        {/* Create Client Modal */}
         {showCreateModal && (
-          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-            <div className="bg-[#1E1E1E] rounded-2xl p-8 max-w-md w-full border border-[#2A2A2A]">
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-2xl font-bold text-white">
-                  Add New Client
-                </h2>
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <div
+              className="fixed inset-0 bg-black/50 backdrop-blur-sm"
+              onClick={() => setShowCreateModal(false)}
+            />
+
+            <div className="relative w-full max-w-md bg-gray-900/95 backdrop-blur-xl rounded-2xl border border-gray-800/50 shadow-2xl animate-fade-in">
+              <div className="flex items-center justify-between p-6 border-b border-gray-800/50">
+                <div className="flex items-center space-x-3">
+                  <div className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-lg flex items-center justify-center">
+                    <Plus className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <h2 className="text-xl font-bold text-white">
+                      Add New Client
+                    </h2>
+                    <p className="text-sm text-gray-400">
+                      Create a new client record
+                    </p>
+                  </div>
+                </div>
                 <button
                   onClick={() => setShowCreateModal(false)}
-                  className="text-[#B3B3B3] hover:text-white"
+                  className="text-gray-400 hover:text-white transition-colors p-3 hover:bg-gray-800/50 rounded-lg hover:scale-110 border border-gray-700/50 hover:border-gray-600/50"
+                  title="Close"
                 >
                   <X className="w-6 h-6" />
                 </button>
               </div>
 
-              <form onSubmit={handleCreateClient} className="space-y-6">
+              <form onSubmit={handleCreateClient} className="p-6 space-y-6">
                 <div>
-                  <label
-                    htmlFor="name"
-                    className="block text-sm font-medium text-[#B3B3B3] mb-2"
-                  >
-                    Client Name
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                    Client Name *
                   </label>
                   <input
-                    id="name"
                     type="text"
+                    required
                     value={newClient.name}
                     onChange={(e) =>
                       setNewClient({ ...newClient, name: e.target.value })
                     }
-                    className="w-full px-4 py-3 bg-[#2A2A2A] border border-[#3A3A3A] rounded-lg text-white placeholder-[#B3B3B3] focus:border-[#6366F1] focus:outline-none"
-                    placeholder="Enter client name"
-                    required
+                    placeholder="Enter client name..."
+                    className="w-full input-modern"
                   />
                 </div>
 
                 <div>
-                  <label
-                    htmlFor="email"
-                    className="block text-sm font-medium text-[#B3B3B3] mb-2"
-                  >
-                    Email Address
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                    Email Address *
                   </label>
                   <input
-                    id="email"
                     type="email"
+                    required
                     value={newClient.email}
                     onChange={(e) =>
                       setNewClient({ ...newClient, email: e.target.value })
                     }
-                    className="w-full px-4 py-3 bg-[#2A2A2A] border border-[#3A3A3A] rounded-lg text-white placeholder-[#B3B3B3] focus:border-[#6366F1] focus:outline-none"
-                    placeholder="Enter client email"
-                    required
+                    placeholder="Enter client email..."
+                    className="w-full input-modern"
                   />
                 </div>
 
-                <div className="flex items-center space-x-3">
+                <div className="flex items-center space-x-3 p-4 bg-gray-800/30 rounded-lg border border-gray-700/50">
                   <input
                     id="isInvited"
                     type="checkbox"
@@ -276,26 +285,34 @@ export default function ClientsPage() {
                         isInvited: e.target.checked,
                       })
                     }
-                    className="w-4 h-4 text-[#6366F1] bg-[#2A2A2A] border-[#3A3A3A] rounded focus:ring-[#6366F1] focus:ring-2"
+                    className="w-4 h-4 text-indigo-500 bg-gray-800 border-gray-600 rounded focus:ring-indigo-500 focus:ring-2"
                   />
-                  <label htmlFor="isInvited" className="text-sm text-[#B3B3B3]">
-                    Send invitation email
+                  <label htmlFor="isInvited" className="text-sm text-gray-300">
+                    Send invitation email (allows client to log in)
                   </label>
                 </div>
 
-                <div className="flex space-x-4">
+                <div className="flex items-center justify-end space-x-3 pt-6 border-t border-gray-800/50">
                   <button
                     type="button"
                     onClick={() => setShowCreateModal(false)}
-                    className="flex-1 px-4 py-3 border border-[#3A3A3A] text-[#B3B3B3] rounded-lg hover:bg-[#2A2A2A] transition-colors"
+                    className="btn-secondary"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
-                    className="flex-1 px-4 py-3 bg-gradient-to-r from-[#6366F1] to-[#8B5CF6] text-white rounded-lg hover:from-[#5B5BD6] hover:to-[#7C3AED] transition-all duration-200"
+                    disabled={!newClient.name.trim() || !newClient.email.trim()}
+                    className={cn(
+                      "btn-primary",
+                      (!newClient.name.trim() || !newClient.email.trim()) &&
+                        "opacity-50 cursor-not-allowed"
+                    )}
                   >
-                    Create Client
+                    <div className="flex items-center space-x-2">
+                      <Plus className="w-4 h-4" />
+                      <span>Create Client</span>
+                    </div>
                   </button>
                 </div>
               </form>

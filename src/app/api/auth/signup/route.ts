@@ -1,19 +1,18 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { hashPassword, generateToken } from "@/lib/auth";
+import { hashPassword } from "@/lib/auth";
 
 export async function POST(request: NextRequest) {
   try {
-    const { email, password, name, role = "USER" } = await request.json();
+    const { name, email, password, role = "USER" } = await request.json();
 
-    if (!email || !password || !name) {
+    if (!name || !email || !password) {
       return NextResponse.json(
-        { error: "Email, password, and name are required" },
+        { error: "Name, email, and password are required" },
         { status: 400 }
       );
     }
 
-    // Check if user already exists
     const existingUser = await db.user.findUnique({
       where: { email },
     });
@@ -25,31 +24,34 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Hash password
     const hashedPassword = await hashPassword(password);
 
-    // Create user
     const user = await db.user.create({
       data: {
+        name,
         email,
         password: hashedPassword,
-        name,
         role,
       },
     });
 
-    // Generate token
-    const token = generateToken(user.id, user.role);
-
-    return NextResponse.json({
+    const response = NextResponse.json({
       user: {
         id: user.id,
-        email: user.email,
         name: user.name,
+        email: user.email,
         role: user.role,
       },
-      token,
     });
+
+    response.cookies.set("userId", user.id, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      maxAge: 60 * 60 * 24 * 7,
+    });
+
+    return response;
   } catch (error) {
     console.error("Signup error:", error);
     return NextResponse.json(

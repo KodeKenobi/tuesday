@@ -1,23 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { getUserFromToken } from "@/lib/auth";
+import { getUserFromRequest } from "@/lib/auth";
 
 export async function GET(request: NextRequest) {
   try {
-    const authHeader = request.headers.get("authorization");
-    if (!authHeader?.startsWith("Bearer ")) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    const token = authHeader.substring(7);
-    const user = await getUserFromToken(token);
+    const user = await getUserFromRequest(request);
 
     if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    // Only users can view clients
-    if (user.role !== "USER") {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -39,20 +28,9 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const authHeader = request.headers.get("authorization");
-    if (!authHeader?.startsWith("Bearer ")) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    const token = authHeader.substring(7);
-    const user = await getUserFromToken(token);
+    const user = await getUserFromRequest(request);
 
     if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    // Only users can create clients
-    if (user.role !== "USER") {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -65,7 +43,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Check if client already exists
     const existingClient = await db.client.findUnique({
       where: { email },
     });

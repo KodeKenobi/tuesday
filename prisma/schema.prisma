@@ -25,6 +25,7 @@ model User {
   // Relations
   createdTickets Ticket[] @relation("TicketCreator")
   assignedTickets Ticket[] @relation("TicketAssignee")
+  passwordResets PasswordReset[]
 }
 
 model Client {
@@ -39,14 +40,22 @@ model Client {
   tickets Ticket[]
 }
 
+model PasswordReset {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  userId    String
+  expiresAt DateTime
+  used      Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
 model Ticket {
   id          String       @id @default(cuid())
   title       String
-  description String?
-  priority    Priority     @default(MEDIUM)
   status      TicketStatus @default(BACKLOG)
-  estimatedHours Float?
-  tags        String?      // JSON string of tags array
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @updatedAt
 
@@ -72,11 +81,4 @@ enum TicketStatus {
   REVISIONS
   CLIENT_REVIEW
   COMPLETE
-}
-
-enum Priority {
-  LOW
-  MEDIUM
-  HIGH
-  URGENT
 }

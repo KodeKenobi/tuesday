@@ -3,38 +3,21 @@
 import { useState } from "react";
 import {
   X,
-  User,
-  Calendar,
-  Tag,
-  Clock,
-  MessageSquare,
   Edit,
-  Trash2,
-  Copy,
-  Share2,
-  MoreHorizontal,
   CheckCircle,
-  AlertCircle,
   Clock as ClockIcon,
-  Star,
   Zap,
+  AlertCircle,
   Eye,
-  Flag,
-  Minus,
   Building,
   FileText,
-  Link,
-  Download,
-  Paperclip,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface Ticket {
   id: string;
   title: string;
-  description?: string;
   status: string;
-  priority: string;
   createdAt: string;
   updatedAt: string;
   creator: {
@@ -52,9 +35,6 @@ interface Ticket {
     name: string;
     email: string;
   };
-  tags?: string[];
-  estimatedHours?: number;
-  actualHours?: number;
 }
 
 interface TicketDetailModalProps {
@@ -63,6 +43,7 @@ interface TicketDetailModalProps {
   onClose: () => void;
   onStatusChange: (ticketId: string, newStatus: string) => void;
   onDelete?: (ticketId: string) => void;
+  onUpdate?: (ticketId: string, updates: Partial<Ticket>) => void;
 }
 
 const statusConfig = {
@@ -98,47 +79,22 @@ const statusConfig = {
   },
 };
 
-const priorityConfig = {
-  LOW: {
-    label: "Low",
-    color: "bg-gray-500/20 text-gray-400",
-    icon: Minus,
-  },
-  MEDIUM: {
-    label: "Medium",
-    color: "bg-yellow-500/20 text-yellow-400",
-    icon: AlertCircle,
-  },
-  HIGH: {
-    label: "High",
-    color: "bg-orange-500/20 text-orange-400",
-    icon: Flag,
-  },
-  URGENT: {
-    label: "Urgent",
-    color: "bg-red-500/20 text-red-400",
-    icon: AlertCircle,
-  },
-};
-
 export default function TicketDetailModal({
   ticket,
   isOpen,
   onClose,
   onStatusChange,
   onDelete,
+  onUpdate,
 }: TicketDetailModalProps) {
   const [isEditing, setIsEditing] = useState(false);
-  const [newComment, setNewComment] = useState("");
+  const [editData, setEditData] = useState<Partial<Ticket>>({});
+  const [isSaving, setIsSaving] = useState(false);
 
   if (!isOpen || !ticket) return null;
 
   const status = statusConfig[ticket.status as keyof typeof statusConfig];
-  const priority = ticket.priority
-    ? priorityConfig[ticket.priority as keyof typeof priorityConfig]
-    : null;
   const StatusIcon = status.icon;
-  const PriorityIcon = priority?.icon;
 
   const handleStatusChange = (newStatus: string) => {
     onStatusChange(ticket.id, newStatus);
@@ -151,32 +107,63 @@ export default function TicketDetailModal({
     }
   };
 
-  const copyTicketLink = () => {
-    navigator.clipboard.writeText(
-      `${window.location.origin}/tickets/${ticket.id}`
-    );
+  const handleEditToggle = () => {
+    if (isEditing) {
+      setEditData({});
+    } else {
+      setEditData({
+        title: ticket.title,
+      });
+    }
+    setIsEditing(!isEditing);
+  };
+
+  const handleSave = async () => {
+    if (!onUpdate) return;
+    
+    setIsSaving(true);
+    try {
+      await onUpdate(ticket.id, editData);
+      setIsEditing(false);
+      setEditData({});
+    } catch (error) {
+      console.error("Failed to update ticket:", error);
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      {/* Backdrop */}
       <div
         className="fixed inset-0 bg-black/50 backdrop-blur-sm"
         onClick={onClose}
       />
 
-      {/* Modal */}
-      <div className="relative w-full max-w-4xl bg-gray-900/95 backdrop-blur-xl rounded-2xl border border-gray-800/50 shadow-2xl animate-fade-in max-h-[90vh] overflow-y-auto">
-        {/* Header */}
-        <div className="sticky top-0 bg-gray-900/95 backdrop-blur-xl z-10 flex items-center justify-between p-6 border-b border-gray-800/50">
+      <div className="relative w-full max-w-2xl bg-gray-900/95 backdrop-blur-xl rounded-2xl border border-gray-800/50 shadow-2xl animate-fade-in">
+        <div className="flex items-center justify-between p-6 border-b border-gray-800/50">
           <div className="flex items-center space-x-4">
             <div className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-lg flex items-center justify-center">
               <FileText className="w-5 h-5 text-white" />
             </div>
             <div className="flex-1">
-              <h2 className="text-xl font-bold text-white line-clamp-1">
-                {ticket.title}
-              </h2>
+              {isEditing ? (
+                <input
+                  type="text"
+                  value={editData.title || ticket.title}
+                  onChange={(e) =>
+                    setEditData((prev) => ({
+                      ...prev,
+                      title: e.target.value,
+                    }))
+                  }
+                  className="text-xl font-bold text-white bg-transparent border-b border-gray-600 focus:border-indigo-500 focus:outline-none w-full"
+                />
+              ) : (
+                <h2 className="text-xl font-bold text-white line-clamp-1">
+                  {ticket.title}
+                </h2>
+              )}
               <p className="text-sm text-gray-400">
                 Created by {ticket.creator.name} •{" "}
                 {new Date(ticket.createdAt).toLocaleDateString()}
@@ -186,26 +173,33 @@ export default function TicketDetailModal({
 
           <div className="flex items-center space-x-2">
             <button
-              onClick={copyTicketLink}
+              onClick={handleEditToggle}
               className="text-gray-400 hover:text-white transition-colors p-2 hover:bg-gray-800/50 rounded-lg"
-              title="Copy link"
-            >
-              <Link className="w-4 h-4" />
-            </button>
-            <button
-              onClick={() => setIsEditing(!isEditing)}
-              className="text-gray-400 hover:text-white transition-colors p-2 hover:bg-gray-800/50 rounded-lg"
-              title="Edit ticket"
+              title={isEditing ? "Cancel edit" : "Edit ticket"}
             >
               <Edit className="w-4 h-4" />
             </button>
+            {isEditing && (
+              <button
+                onClick={handleSave}
+                disabled={isSaving}
+                className="text-green-400 hover:text-green-300 transition-colors p-2 hover:bg-green-500/10 rounded-lg disabled:opacity-50"
+                title="Save changes"
+              >
+                {isSaving ? (
+                  <div className="w-4 h-4 border-2 border-green-400 border-t-transparent rounded-full animate-spin" />
+                ) : (
+                  <CheckCircle className="w-4 h-4" />
+                )}
+              </button>
+            )}
             {onDelete && (
               <button
                 onClick={handleDelete}
                 className="text-red-400 hover:text-red-300 transition-colors p-2 hover:bg-red-500/10 rounded-lg"
                 title="Delete ticket"
               >
-                <Trash2 className="w-4 h-4" />
+                <X className="w-4 h-4" />
               </button>
             )}
             <button
@@ -218,126 +212,9 @@ export default function TicketDetailModal({
           </div>
         </div>
 
-        {/* Content */}
         <div className="p-6 space-y-6">
-          {/* Main Content Grid */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Left Column - Main Content */}
-            <div className="lg:col-span-2 space-y-6">
-              {/* Description */}
-              <div>
-                <h3 className="text-lg font-semibold text-white mb-3">
-                  Description
-                </h3>
-                <div className="bg-gray-800/50 rounded-lg p-4 border border-gray-700/50">
-                  {ticket.description ? (
-                    <p className="text-gray-300 leading-relaxed whitespace-pre-wrap">
-                      {ticket.description}
-                    </p>
-                  ) : (
-                    <p className="text-gray-500 italic">
-                      No description provided
-                    </p>
-                  )}
-                </div>
-              </div>
-
-              {/* Comments Section */}
-              <div>
-                <h3 className="text-lg font-semibold text-white mb-3">
-                  Comments
-                </h3>
-                <div className="space-y-4">
-                  {/* Add Comment */}
-                  <div className="bg-gray-800/50 rounded-lg p-4 border border-gray-700/50">
-                    <div className="flex items-start space-x-3">
-                      <div className="w-8 h-8 bg-indigo-500 rounded-full flex items-center justify-center flex-shrink-0">
-                        <span className="text-white text-sm font-medium">
-                          {ticket.creator.name.charAt(0)}
-                        </span>
-                      </div>
-                      <div className="flex-1">
-                        <textarea
-                          value={newComment}
-                          onChange={(e) => setNewComment(e.target.value)}
-                          placeholder="Add a comment..."
-                          className="w-full bg-gray-700/50 border border-gray-600/50 rounded-lg p-3 text-white placeholder-gray-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition-all resize-none"
-                          rows={3}
-                        />
-                        <div className="flex items-center justify-between mt-3">
-                          <div className="flex items-center space-x-2">
-                            <button className="text-gray-400 hover:text-white transition-colors p-1">
-                              <Paperclip className="w-4 h-4" />
-                            </button>
-                            <button className="text-gray-400 hover:text-white transition-colors p-1">
-                              <Link className="w-4 h-4" />
-                            </button>
-                          </div>
-                          <button className="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors text-sm">
-                            Comment
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Sample Comments */}
-                  <div className="bg-gray-800/50 rounded-lg p-4 border border-gray-700/50">
-                    <div className="flex items-start space-x-3">
-                      <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center flex-shrink-0">
-                        <span className="text-white text-sm font-medium">
-                          M
-                        </span>
-                      </div>
-                      <div className="flex-1">
-                        <div className="flex items-center space-x-2 mb-2">
-                          <span className="text-white font-medium text-sm">
-                            Mike Rodriguez
-                          </span>
-                          <span className="text-gray-500 text-xs">
-                            2 hours ago
-                          </span>
-                        </div>
-                        <p className="text-gray-300 text-sm">
-                          Started working on the payment integration. The API
-                          documentation looks good, should be able to complete
-                          this by Friday.
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="bg-gray-800/50 rounded-lg p-4 border border-gray-700/50">
-                    <div className="flex items-start space-x-3">
-                      <div className="w-8 h-8 bg-purple-500 rounded-full flex items-center justify-center flex-shrink-0">
-                        <span className="text-white text-sm font-medium">
-                          T
-                        </span>
-                      </div>
-                      <div className="flex-1">
-                        <div className="flex items-center space-x-2 mb-2">
-                          <span className="text-white font-medium text-sm">
-                            TechStart Inc.
-                          </span>
-                          <span className="text-gray-500 text-xs">
-                            1 day ago
-                          </span>
-                        </div>
-                        <p className="text-gray-300 text-sm">
-                          Looking forward to seeing the progress on this. Please
-                          make sure to include the mobile responsive design as
-                          discussed.
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Right Column - Sidebar */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <div className="space-y-6">
-              {/* Status */}
               <div>
                 <h3 className="text-sm font-medium text-gray-400 mb-3 uppercase tracking-wide">
                   Status
@@ -355,59 +232,6 @@ export default function TicketDetailModal({
                 </select>
               </div>
 
-              {/* Priority */}
-              <div>
-                <h3 className="text-sm font-medium text-gray-400 mb-3 uppercase tracking-wide">
-                  Priority
-                </h3>
-                {ticket.priority && priority ? (
-                  <div
-                    className={cn(
-                      "inline-flex items-center space-x-2 px-3 py-2 rounded-lg border",
-                      priority.color
-                    )}
-                  >
-                    {PriorityIcon && <PriorityIcon className="w-4 h-4" />}
-                    <span className="text-sm font-medium">
-                      {priority.label}
-                    </span>
-                  </div>
-                ) : (
-                  <p className="text-gray-500 text-sm italic">
-                    No priority set
-                  </p>
-                )}
-              </div>
-
-              {/* Assignee */}
-              <div>
-                <h3 className="text-sm font-medium text-gray-400 mb-3 uppercase tracking-wide">
-                  Assignee
-                </h3>
-                <div className="flex items-center space-x-3">
-                  {ticket.assignee ? (
-                    <>
-                      <div className="w-8 h-8 bg-indigo-500 rounded-full flex items-center justify-center">
-                        <span className="text-white text-sm font-medium">
-                          {ticket.assignee.name.charAt(0)}
-                        </span>
-                      </div>
-                      <div>
-                        <p className="text-white text-sm font-medium">
-                          {ticket.assignee.name}
-                        </p>
-                        <p className="text-gray-400 text-xs">
-                          {ticket.assignee.email}
-                        </p>
-                      </div>
-                    </>
-                  ) : (
-                    <p className="text-gray-500 text-sm italic">Unassigned</p>
-                  )}
-                </div>
-              </div>
-
-              {/* Client */}
               <div>
                 <h3 className="text-sm font-medium text-gray-400 mb-3 uppercase tracking-wide">
                   Client
@@ -434,52 +258,9 @@ export default function TicketDetailModal({
                   )}
                 </div>
               </div>
+            </div>
 
-              {/* Tags */}
-              {ticket.tags && ticket.tags.length > 0 && (
-                <div>
-                  <h3 className="text-sm font-medium text-gray-400 mb-3 uppercase tracking-wide">
-                    Tags
-                  </h3>
-                  <div className="flex flex-wrap gap-2">
-                    {ticket.tags.map((tag, index) => (
-                      <span
-                        key={index}
-                        className="px-2 py-1 bg-indigo-500/20 text-indigo-400 rounded text-xs font-medium"
-                      >
-                        {tag}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Time Tracking */}
-              <div>
-                <h3 className="text-sm font-medium text-gray-400 mb-3 uppercase tracking-wide">
-                  Time
-                </h3>
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <span className="text-gray-400 text-sm">Estimated:</span>
-                    <span className="text-white text-sm">
-                      {ticket.estimatedHours
-                        ? `${ticket.estimatedHours}h`
-                        : "Not set"}
-                    </span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-gray-400 text-sm">Actual:</span>
-                    <span className="text-white text-sm">
-                      {ticket.actualHours
-                        ? `${ticket.actualHours}h`
-                        : "Not tracked"}
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Dates */}
+            <div className="space-y-6">
               <div>
                 <h3 className="text-sm font-medium text-gray-400 mb-3 uppercase tracking-wide">
                   Dates
@@ -497,27 +278,6 @@ export default function TicketDetailModal({
                       {new Date(ticket.updatedAt).toLocaleDateString()}
                     </span>
                   </div>
-                </div>
-              </div>
-
-              {/* Actions */}
-              <div>
-                <h3 className="text-sm font-medium text-gray-400 mb-3 uppercase tracking-wide">
-                  Actions
-                </h3>
-                <div className="space-y-2">
-                  <button className="w-full flex items-center space-x-2 px-3 py-2 text-gray-300 hover:text-white hover:bg-gray-800/50 rounded-lg transition-colors text-sm">
-                    <Share2 className="w-4 h-4" />
-                    <span>Share</span>
-                  </button>
-                  <button className="w-full flex items-center space-x-2 px-3 py-2 text-gray-300 hover:text-white hover:bg-gray-800/50 rounded-lg transition-colors text-sm">
-                    <Copy className="w-4 h-4" />
-                    <span>Duplicate</span>
-                  </button>
-                  <button className="w-full flex items-center space-x-2 px-3 py-2 text-gray-300 hover:text-white hover:bg-gray-800/50 rounded-lg transition-colors text-sm">
-                    <Download className="w-4 h-4" />
-                    <span>Export</span>
-                  </button>
                 </div>
               </div>
             </div>

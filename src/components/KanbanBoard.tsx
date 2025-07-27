@@ -24,7 +24,6 @@ import {
   Clock,
   CheckCircle,
   AlertCircle,
-  Star,
   Zap,
   Eye,
   Tag,
@@ -34,9 +33,7 @@ import { cn } from "@/lib/utils";
 interface Ticket {
   id: string;
   title: string;
-  description?: string;
   status: string;
-  priority: string;
   createdAt: string;
   updatedAt: string;
   creator: {
@@ -54,9 +51,6 @@ interface Ticket {
     name: string;
     email: string;
   };
-  tags?: string[];
-  estimatedHours?: number;
-  actualHours?: number;
 }
 
 interface KanbanBoardProps {
@@ -100,30 +94,6 @@ const statusConfig = {
   },
 };
 
-const priorityConfig = {
-  LOW: {
-    label: "Low",
-    icon: CheckCircle,
-    color: "text-green-400 bg-green-400/10 border-green-400/20",
-  },
-  MEDIUM: {
-    label: "Medium",
-    icon: Clock,
-    color: "text-yellow-400 bg-yellow-400/10 border-yellow-400/20",
-  },
-  HIGH: {
-    label: "High",
-    icon: AlertCircle,
-    color: "text-orange-400 bg-orange-400/10 border-orange-400/20",
-  },
-  URGENT: {
-    label: "Urgent",
-    icon: Star,
-    color: "text-red-400 bg-red-400/10 border-red-400/20",
-  },
-};
-
-// Sortable Ticket Component
 function SortableTicket({
   ticket,
   onClick,
@@ -145,11 +115,6 @@ function SortableTicket({
     transition,
   };
 
-  const priority = ticket.priority
-    ? priorityConfig[ticket.priority as keyof typeof priorityConfig]
-    : null;
-  const PriorityIcon = priority?.icon;
-
   return (
     <div
       ref={setNodeRef}
@@ -162,7 +127,6 @@ function SortableTicket({
       )}
       onClick={onClick}
     >
-      {/* Ticket Header */}
       <div className="flex items-start justify-between mb-3">
         <h4 className="text-white font-medium text-sm line-clamp-2 flex-1">
           {ticket.title}
@@ -172,49 +136,10 @@ function SortableTicket({
         </button>
       </div>
 
-      {/* Description */}
-      {ticket.description && (
-        <p className="text-gray-400 text-xs mb-3 line-clamp-2">
-          {ticket.description}
-        </p>
-      )}
-
-      {/* Tags */}
-      {ticket.tags && ticket.tags.length > 0 && (
-        <div className="flex flex-wrap gap-1 mb-3">
-          {ticket.tags.slice(0, 2).map((tag, index) => (
-            <span
-              key={index}
-              className="px-2 py-1 bg-gray-700/50 text-gray-300 text-xs rounded"
-            >
-              {tag}
-            </span>
-          ))}
-          {ticket.tags.length > 2 && (
-            <span className="px-2 py-1 bg-gray-700/50 text-gray-300 text-xs rounded">
-              +{ticket.tags.length - 2}
-            </span>
-          )}
-        </div>
-      )}
-
-      {/* Ticket Footer */}
       <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-2">
-          {ticket.assignee && (
-            <div className="w-6 h-6 bg-indigo-500 rounded-full flex items-center justify-center">
-              <span className="text-white text-xs font-medium">
-                {ticket.assignee.name.charAt(0)}
-              </span>
-            </div>
-          )}
-          {ticket.priority && PriorityIcon && (
-            <div className={cn("p-1 rounded border", priority.color)}>
-              <PriorityIcon className="w-3 h-3" />
-            </div>
-          )}
+        <div className="text-gray-300 text-xs">
+          {ticket.client?.name || "No client"}
         </div>
-
         <div className="text-gray-400 text-xs">
           {new Date(ticket.createdAt).toLocaleDateString()}
         </div>
@@ -223,13 +148,7 @@ function SortableTicket({
   );
 }
 
-// Dragged Ticket Overlay
 function DraggedTicket({ ticket }: { ticket: Ticket }) {
-  const priority = ticket.priority
-    ? priorityConfig[ticket.priority as keyof typeof priorityConfig]
-    : null;
-  const PriorityIcon = priority?.icon;
-
   return (
     <div className="bg-gray-800 rounded-lg p-4 border border-gray-600 shadow-2xl w-80">
       <div className="flex items-start justify-between mb-3">
@@ -238,28 +157,10 @@ function DraggedTicket({ ticket }: { ticket: Ticket }) {
         </h4>
       </div>
 
-      {ticket.description && (
-        <p className="text-gray-400 text-xs mb-3 line-clamp-2">
-          {ticket.description}
-        </p>
-      )}
-
       <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-2">
-          {ticket.assignee && (
-            <div className="w-6 h-6 bg-indigo-500 rounded-full flex items-center justify-center">
-              <span className="text-white text-xs font-medium">
-                {ticket.assignee.name.charAt(0)}
-              </span>
-            </div>
-          )}
-          {ticket.priority && PriorityIcon && (
-            <div className={cn("p-1 rounded border", priority.color)}>
-              <PriorityIcon className="w-3 h-3" />
-            </div>
-          )}
+        <div className="text-gray-300 text-xs">
+          {ticket.client?.name || "No client"}
         </div>
-
         <div className="text-gray-400 text-xs">
           {new Date(ticket.createdAt).toLocaleDateString()}
         </div>
@@ -268,7 +169,6 @@ function DraggedTicket({ ticket }: { ticket: Ticket }) {
   );
 }
 
-// Droppable Column
 function DroppableColumn({
   status,
   children,
@@ -296,7 +196,6 @@ export default function KanbanBoard({
 }: KanbanBoardProps) {
   const [activeId, setActiveId] = useState<string | null>(null);
 
-  // Group tickets by status
   const groupedTickets = tickets.reduce((acc, ticket) => {
     if (!acc[ticket.status]) {
       acc[ticket.status] = [];
@@ -305,7 +204,6 @@ export default function KanbanBoard({
     return acc;
   }, {} as Record<string, Ticket[]>);
 
-  // Ensure all status columns exist
   Object.keys(statusConfig).forEach((status) => {
     if (!groupedTickets[status]) {
       groupedTickets[status] = [];
@@ -335,7 +233,6 @@ export default function KanbanBoard({
 
     if (activeId === overId) return;
 
-    // Find the current status of the dragged ticket
     let currentStatus = "";
     Object.entries(groupedTickets).forEach(([status, tickets]) => {
       if (tickets.find((t) => t.id === activeId)) {
@@ -343,7 +240,6 @@ export default function KanbanBoard({
       }
     });
 
-    // If dropped on a status column, update the ticket status
     if (
       Object.keys(statusConfig).includes(overId) &&
       currentStatus !== overId
@@ -369,7 +265,6 @@ export default function KanbanBoard({
           return (
             <DroppableColumn key={status} status={status}>
               <div className="bg-gray-900/50 backdrop-blur-xl rounded-xl border border-gray-800/50 min-h-[600px]">
-                {/* Column Header */}
                 <div className="p-4 border-b border-gray-800/50">
                   <div className="flex items-center justify-between mb-2">
                     <div className="flex items-center space-x-2">
@@ -385,7 +280,6 @@ export default function KanbanBoard({
                     </span>
                   </div>
 
-                  {/* Add Ticket Button */}
                   {userRole === "USER" && (
                     <button
                       onClick={onCreateTicket}
@@ -397,7 +291,6 @@ export default function KanbanBoard({
                   )}
                 </div>
 
-                {/* Tickets */}
                 <div className="p-4 space-y-3 max-h-[500px] overflow-y-auto">
                   <SortableContext
                     items={tickets.map((t) => t.id)}

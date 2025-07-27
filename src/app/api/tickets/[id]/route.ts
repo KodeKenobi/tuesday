@@ -1,20 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { getUserFromToken } from "@/lib/auth";
+import { getUserFromRequest } from "@/lib/auth";
 
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: { id: string } }
 ) {
   try {
-    const { id } = await params;
-    const authHeader = request.headers.get("authorization");
-    if (!authHeader?.startsWith("Bearer ")) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    const token = authHeader.substring(7);
-    const user = await getUserFromToken(token);
+    const user = await getUserFromRequest(request);
 
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -22,45 +15,8 @@ export async function PATCH(
 
     const { status } = await request.json();
 
-    if (!status) {
-      return NextResponse.json(
-        { error: "Status is required" },
-        { status: 400 }
-      );
-    }
-
-    // Get the ticket to check permissions
-    const ticket = await db.ticket.findUnique({
-      where: { id },
-      include: {
-        client: true,
-      },
-    });
-
-    if (!ticket) {
-      return NextResponse.json({ error: "Ticket not found" }, { status: 404 });
-    }
-
-    // If user is a client, they can only update tickets assigned to them
-    if (user.role === "CLIENT") {
-      if (ticket.clientId !== user.id) {
-        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-      }
-
-      // Clients can only set status to COMPLETE or REVISIONS
-      if (status !== "COMPLETE" && status !== "REVISIONS") {
-        return NextResponse.json(
-          {
-            error:
-              "Clients can only mark tickets as complete or request revisions",
-          },
-          { status: 400 }
-        );
-      }
-    }
-
-    const updatedTicket = await db.ticket.update({
-      where: { id },
+    const ticket = await db.ticket.update({
+      where: { id: params.id },
       data: { status },
       include: {
         creator: {
@@ -87,7 +43,7 @@ export async function PATCH(
       },
     });
 
-    return NextResponse.json(updatedTicket);
+    return NextResponse.json(ticket);
   } catch (error) {
     console.error("Update ticket error:", error);
     return NextResponse.json(

@@ -1,6 +1,6 @@
 import bcrypt from "bcryptjs";
-import jwt from "jsonwebtoken";
 import { db } from "./db";
+import { NextRequest } from "next/server";
 
 export async function hashPassword(password: string): Promise<string> {
   return bcrypt.hash(password, 12);
@@ -13,33 +13,21 @@ export async function verifyPassword(
   return bcrypt.compare(password, hashedPassword);
 }
 
-export function generateToken(userId: string, role: string): string {
-  return jwt.sign({ userId, role }, process.env.JWT_SECRET!, {
-    expiresIn: "7d",
+export async function getUserById(userId: string) {
+  return db.user.findUnique({
+    where: { id: userId },
   });
 }
 
-export function verifyToken(
-  token: string
-): { userId: string; role: string } | null {
-  try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET!) as {
-      userId: string;
-      role: string;
-    };
-    return decoded;
-  } catch (error) {
-    return null;
-  }
+export async function getUserByEmail(email: string) {
+  return db.user.findUnique({
+    where: { email },
+  });
 }
 
-export async function getUserFromToken(token: string) {
-  const decoded = verifyToken(token);
-  if (!decoded) return null;
+export async function getUserFromRequest(request: NextRequest) {
+  const userId = request.cookies.get("userId")?.value;
+  if (!userId) return null;
 
-  const user = await db.user.findUnique({
-    where: { id: decoded.userId },
-  });
-
-  return user;
+  return getUserById(userId);
 }

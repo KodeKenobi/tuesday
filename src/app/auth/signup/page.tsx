@@ -47,7 +47,7 @@ export default function SignupPage() {
     setLoading(true);
 
     try {
-      await signup(email, password, name, role);
+      await signup(name, email, password, role);
     } catch (error) {
       console.error("Signup error:", error);
       setError(error instanceof Error ? error.message : "Signup failed");
@@ -72,12 +72,22 @@ export default function SignupPage() {
               transition={{ duration: 0.6, ease: "easeOut" }}
               className="mb-16"
             >
-              <h1 className="text-5xl font-bold mb-4 tracking-tight">
-                Tuesday
-              </h1>
-              <p className="text-xl text-gray-300 font-medium">
+              <motion.h1
+                initial={{ opacity: 0, x: -50 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
+                className="text-5xl font-bold mb-4 tracking-tight"
+              >
+                ClickDown
+              </motion.h1>
+              <motion.p
+                initial={{ opacity: 0, x: 50 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.8, delay: 0.4, ease: "easeOut" }}
+                className="text-xl text-gray-300 font-medium"
+              >
                 Simple ticket management for modern teams
-              </p>
+              </motion.p>
             </motion.div>
 
             {/* Clean feature list */}
@@ -87,11 +97,30 @@ export default function SignupPage() {
               transition={{ duration: 0.6, delay: 0.2 }}
               className="space-y-8"
             >
-              <div className="flex items-start space-x-4">
-                <div className="w-8 h-8 bg-pink-500/20 rounded-lg flex items-center justify-center flex-shrink-0 mt-1">
+              <motion.div
+                initial={{ opacity: 0, x: -30, y: 20 }}
+                animate={{ opacity: 1, x: 0, y: 0 }}
+                transition={{ duration: 0.7, delay: 0.6, ease: "easeOut" }}
+                className="flex items-start space-x-4"
+              >
+                <motion.div
+                  initial={{ scale: 0, rotate: -180 }}
+                  animate={{ scale: 1, rotate: 0 }}
+                  transition={{
+                    duration: 0.5,
+                    delay: 0.8,
+                    type: "spring",
+                    stiffness: 200,
+                  }}
+                  className="w-8 h-8 bg-pink-500/20 rounded-lg flex items-center justify-center flex-shrink-0 mt-1"
+                >
                   <CheckCircle className="w-5 h-5 text-pink-400" />
-                </div>
-                <div>
+                </motion.div>
+                <motion.div
+                  initial={{ opacity: 0, x: 30 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.6, delay: 1.0, ease: "easeOut" }}
+                >
                   <h3 className="font-semibold text-lg mb-2">
                     Streamlined Workflow
                   </h3>
@@ -99,14 +128,33 @@ export default function SignupPage() {
                     Manage tickets with a simple 5-step process from backlog to
                     completion
                   </p>
-                </div>
-              </div>
+                </motion.div>
+              </motion.div>
 
-              <div className="flex items-start space-x-4">
-                <div className="w-8 h-8 bg-purple-500/20 rounded-lg flex items-center justify-center flex-shrink-0 mt-1">
+              <motion.div
+                initial={{ opacity: 0, x: 30, y: 20 }}
+                animate={{ opacity: 1, x: 0, y: 0 }}
+                transition={{ duration: 0.7, delay: 0.8, ease: "easeOut" }}
+                className="flex items-start space-x-4"
+              >
+                <motion.div
+                  initial={{ scale: 0, rotate: 180 }}
+                  animate={{ scale: 1, rotate: 0 }}
+                  transition={{
+                    duration: 0.5,
+                    delay: 1.0,
+                    type: "spring",
+                    stiffness: 200,
+                  }}
+                  className="w-8 h-8 bg-purple-500/20 rounded-lg flex items-center justify-center flex-shrink-0 mt-1"
+                >
                   <Users className="w-5 h-5 text-purple-400" />
-                </div>
-                <div>
+                </motion.div>
+                <motion.div
+                  initial={{ opacity: 0, x: -30 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.6, delay: 1.2, ease: "easeOut" }}
+                >
                   <h3 className="font-semibold text-lg mb-2">
                     Role-Based Access
                   </h3>
@@ -114,22 +162,41 @@ export default function SignupPage() {
                     Separate portals for team members and clients with
                     appropriate permissions
                   </p>
-                </div>
-              </div>
+                </motion.div>
+              </motion.div>
 
-              <div className="flex items-start space-x-4">
-                <div className="w-8 h-8 bg-blue-500/20 rounded-lg flex items-center justify-center flex-shrink-0 mt-1">
+              <motion.div
+                initial={{ opacity: 0, x: -30, y: 20 }}
+                animate={{ opacity: 1, x: 0, y: 0 }}
+                transition={{ duration: 0.7, delay: 1.0, ease: "easeOut" }}
+                className="flex items-start space-x-4"
+              >
+                <motion.div
+                  initial={{ scale: 0, rotate: -180 }}
+                  animate={{ scale: 1, rotate: 0 }}
+                  transition={{
+                    duration: 0.5,
+                    delay: 1.2,
+                    type: "spring",
+                    stiffness: 200,
+                  }}
+                  className="w-8 h-8 bg-blue-500/20 rounded-lg flex items-center justify-center flex-shrink-0 mt-1"
+                >
                   <BarChart3 className="w-5 h-5 text-blue-400" />
-                </div>
-                <div>
+                </motion.div>
+                <motion.div
+                  initial={{ opacity: 0, x: 30 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.6, delay: 1.4, ease: "easeOut" }}
+                >
                   <h3 className="font-semibold text-lg mb-2">
                     Real-time Updates
                   </h3>
                   <p className="text-gray-400 leading-relaxed">
                     Track progress and status changes instantly across your team
                   </p>
-                </div>
-              </div>
+                </motion.div>
+              </motion.div>
             </motion.div>
 
             {/* Stats or social proof */}
@@ -140,18 +207,81 @@ export default function SignupPage() {
               className="mt-16 pt-8 border-t border-white/10"
             >
               <div className="flex space-x-8">
-                <div>
-                  <div className="text-2xl font-bold text-white">5</div>
+                <motion.div
+                  initial={{ opacity: 0, y: 30, scale: 0.8 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  transition={{
+                    duration: 0.6,
+                    delay: 1.6,
+                    type: "spring",
+                    stiffness: 100,
+                  }}
+                >
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.5 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{
+                      duration: 0.5,
+                      delay: 1.8,
+                      type: "spring",
+                      stiffness: 200,
+                    }}
+                    className="text-2xl font-bold text-white"
+                  >
+                    5
+                  </motion.div>
                   <div className="text-sm text-gray-400">Status Types</div>
-                </div>
-                <div>
-                  <div className="text-2xl font-bold text-white">∞</div>
+                </motion.div>
+                <motion.div
+                  initial={{ opacity: 0, y: 30, scale: 0.8 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  transition={{
+                    duration: 0.6,
+                    delay: 1.8,
+                    type: "spring",
+                    stiffness: 100,
+                  }}
+                >
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.5 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{
+                      duration: 0.5,
+                      delay: 2.0,
+                      type: "spring",
+                      stiffness: 200,
+                    }}
+                    className="text-2xl font-bold text-white"
+                  >
+                    ∞
+                  </motion.div>
                   <div className="text-sm text-gray-400">Unlimited Tickets</div>
-                </div>
-                <div>
-                  <div className="text-2xl font-bold text-white">24/7</div>
+                </motion.div>
+                <motion.div
+                  initial={{ opacity: 0, y: 30, scale: 0.8 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  transition={{
+                    duration: 0.6,
+                    delay: 2.0,
+                    type: "spring",
+                    stiffness: 100,
+                  }}
+                >
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.5 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{
+                      duration: 0.5,
+                      delay: 2.2,
+                      type: "spring",
+                      stiffness: 200,
+                    }}
+                    className="text-2xl font-bold text-white"
+                  >
+                    24/7
+                  </motion.div>
                   <div className="text-sm text-gray-400">Access</div>
-                </div>
+                </motion.div>
               </div>
             </motion.div>
           </div>
@@ -161,14 +291,14 @@ export default function SignupPage() {
         <div className="flex-1 flex items-center justify-center px-6 sm:px-8 lg:px-12 py-12">
           {/* Mobile logo */}
           <div className="lg:hidden text-center mb-8">
-            <h1 className="text-4xl font-bold text-white mb-2">Tuesday</h1>
+            <h1 className="text-4xl font-bold text-white mb-2">ClickDown</h1>
             <p className="text-gray-300 text-lg">Create your account</p>
           </div>
 
           <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, ease: "easeOut" }}
+            initial={{ opacity: 0, x: 50, y: 30 }}
+            animate={{ opacity: 1, x: 0, y: 0 }}
+            transition={{ duration: 0.8, ease: "easeOut" }}
             className="relative z-10 w-full max-w-md bg-white/10 backdrop-blur-xl border border-white/20 shadow-2xl rounded-3xl p-10"
           >
             {/* Header */}
@@ -178,10 +308,22 @@ export default function SignupPage() {
               transition={{ delay: 0.1 }}
               className="text-center mb-8"
             >
-              <h1 className="text-4xl font-bold text-white tracking-tight">
-                Join Tuesday
-              </h1>
-              <p className="mt-2 text-gray-300 text-lg">Create your account</p>
+              <motion.h1
+                initial={{ opacity: 0, y: -30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.7, delay: 0.3, ease: "easeOut" }}
+                className="text-4xl font-bold text-white tracking-tight"
+              >
+                Join ClickDown
+              </motion.h1>
+              <motion.p
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.7, delay: 0.5, ease: "easeOut" }}
+                className="mt-2 text-gray-300 text-lg"
+              >
+                Create your account
+              </motion.p>
             </motion.div>
 
             {error && (
@@ -199,18 +341,32 @@ export default function SignupPage() {
             <form onSubmit={handleSubmit} className="space-y-5">
               {/* Name Field */}
               <motion.div
-                initial={{ opacity: 0, y: 15 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.15 }}
+                initial={{ opacity: 0, x: -40, y: 15 }}
+                animate={{ opacity: 1, x: 0, y: 0 }}
+                transition={{ delay: 0.15, duration: 0.6 }}
               >
-                <label
+                <motion.label
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.2, duration: 0.5 }}
                   htmlFor="name"
                   className="block text-sm font-medium text-gray-200 mb-2"
                 >
                   Full Name
-                </label>
-                <div className="relative">
-                  <User className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
+                </motion.label>
+                <motion.div
+                  initial={{ opacity: 0, x: 40 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.3, duration: 0.6 }}
+                  className="relative"
+                >
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.4, duration: 0.3 }}
+                  >
+                    <User className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
+                  </motion.div>
                   <input
                     id="name"
                     type="text"
@@ -220,23 +376,37 @@ export default function SignupPage() {
                     placeholder="Enter your full name"
                     required
                   />
-                </div>
+                </motion.div>
               </motion.div>
 
               {/* Email Field */}
               <motion.div
-                initial={{ opacity: 0, y: 15 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.2 }}
+                initial={{ opacity: 0, x: 40, y: 15 }}
+                animate={{ opacity: 1, x: 0, y: 0 }}
+                transition={{ delay: 0.2, duration: 0.6 }}
               >
-                <label
+                <motion.label
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.25, duration: 0.5 }}
                   htmlFor="email"
                   className="block text-sm font-medium text-gray-200 mb-2"
                 >
                   Email
-                </label>
-                <div className="relative">
-                  <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
+                </motion.label>
+                <motion.div
+                  initial={{ opacity: 0, x: -40 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.35, duration: 0.6 }}
+                  className="relative"
+                >
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.45, duration: 0.3 }}
+                  >
+                    <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
+                  </motion.div>
                   <input
                     id="email"
                     type="email"
@@ -246,23 +416,42 @@ export default function SignupPage() {
                     placeholder="you@example.com"
                     required
                   />
-                </div>
+                </motion.div>
               </motion.div>
 
               {/* Password Field */}
               <motion.div
-                initial={{ opacity: 0, y: 15 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.25 }}
+                initial={{ opacity: 0, x: -40, y: 15 }}
+                animate={{ opacity: 1, x: 0, y: 0 }}
+                transition={{ delay: 0.25, duration: 0.6 }}
               >
-                <label
+                <motion.label
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.3, duration: 0.5 }}
                   htmlFor="password"
                   className="block text-sm font-medium text-gray-200 mb-2"
                 >
                   Password
-                </label>
-                <div className="relative">
-                  <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
+                </motion.label>
+                <motion.div
+                  initial={{ opacity: 0, x: 40 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.4, duration: 0.6 }}
+                  className="relative"
+                >
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{
+                      delay: 0.5,
+                      duration: 0.4,
+                      type: "spring",
+                      stiffness: 200,
+                    }}
+                  >
+                    <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
+                  </motion.div>
                   <input
                     id="password"
                     type={showPassword ? "text" : "password"}
@@ -272,7 +461,15 @@ export default function SignupPage() {
                     placeholder="••••••••"
                     required
                   />
-                  <button
+                  <motion.button
+                    initial={{ opacity: 0, scale: 0 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{
+                      delay: 0.6,
+                      duration: 0.4,
+                      type: "spring",
+                      stiffness: 200,
+                    }}
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
                     className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white"
@@ -282,21 +479,39 @@ export default function SignupPage() {
                     ) : (
                       <Eye className="w-5 h-5" />
                     )}
-                  </button>
-                </div>
+                  </motion.button>
+                </motion.div>
               </motion.div>
 
               {/* Role Selection */}
               <motion.div
-                initial={{ opacity: 0, y: 15 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.3 }}
+                initial={{ opacity: 0, x: 40, y: 15 }}
+                animate={{ opacity: 1, x: 0, y: 0 }}
+                transition={{ delay: 0.3, duration: 0.6 }}
               >
-                <label className="block text-sm font-medium text-gray-200 mb-2">
+                <motion.label
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.35, duration: 0.5 }}
+                  className="block text-sm font-medium text-gray-200 mb-2"
+                >
                   Account Type
-                </label>
-                <div className="grid grid-cols-2 gap-3">
-                  <button
+                </motion.label>
+                <motion.div
+                  initial={{ opacity: 0, x: -40 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.45, duration: 0.6 }}
+                  className="grid grid-cols-2 gap-3"
+                >
+                  <motion.button
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{
+                      delay: 0.55,
+                      duration: 0.4,
+                      type: "spring",
+                      stiffness: 200,
+                    }}
                     type="button"
                     onClick={() => setRole("USER")}
                     className={cn(
@@ -307,8 +522,16 @@ export default function SignupPage() {
                     )}
                   >
                     User
-                  </button>
-                  <button
+                  </motion.button>
+                  <motion.button
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{
+                      delay: 0.65,
+                      duration: 0.4,
+                      type: "spring",
+                      stiffness: 200,
+                    }}
                     type="button"
                     onClick={() => setRole("CLIENT")}
                     className={cn(
@@ -319,8 +542,8 @@ export default function SignupPage() {
                     )}
                   >
                     Client
-                  </button>
-                </div>
+                  </motion.button>
+                </motion.div>
               </motion.div>
 
               {/* Submit Button */}
