@@ -49,7 +49,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
 
   const handleLogout = () => {
     logout();
-    router.push("/auth/login");
+    router.push("/");
   };
 
   const handleSearch = (e: React.FormEvent) => {

@@ -64,8 +64,7 @@ const statusIcons = {
 export default function ClientDashboardPage() {
   const { user, logout } = useAuth();
   const [tickets, setTickets] = useState<Ticket[]>([]);
-    const [loading, setLoading] = useState(true);
-
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetchTickets();
@@ -102,13 +101,12 @@ export default function ClientDashboardPage() {
       }
 
       fetchTickets();
-    } catch {
-    }
+    } catch {}
   };
 
   const handleLogout = async () => {
     await logout();
-    window.location.href = "/auth/login";
+    window.location.href = "/";
   };
 
   if (!user || user.role !== "CLIENT") {
@@ -249,8 +247,6 @@ export default function ClientDashboardPage() {
             </div>
           </div>
         </div>
-
-
 
         {/* Tickets */}
         {loading ? (
