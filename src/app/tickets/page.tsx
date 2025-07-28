@@ -78,10 +78,6 @@ export default function TicketsPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [viewMode] = useState<"grid" | "list">("grid");
 
-  useEffect(() => {
-    fetchTickets();
-  }, [statusFilter, fetchTickets]);
-
   const fetchTickets = useCallback(async () => {
     try {
       const params = new URLSearchParams();
@@ -103,6 +99,10 @@ export default function TicketsPage() {
     }
   }, [statusFilter]);
 
+  useEffect(() => {
+    fetchTickets();
+  }, [statusFilter, fetchTickets]);
+
   const handleStatusChange = async (ticketId: string, newStatus: string) => {
     try {
       const response = await fetch(`/api/tickets/${ticketId}`, {
@@ -118,8 +118,7 @@ export default function TicketsPage() {
       }
 
       fetchTickets();
-    } catch {
-    }
+    } catch {}
   };
 
   const handleDeleteTicket = async (ticketId: string) => {
@@ -137,8 +136,7 @@ export default function TicketsPage() {
       }
 
       fetchTickets();
-    } catch {
-    }
+    } catch {}
   };
 
   const filteredTickets = tickets.filter(
