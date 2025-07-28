@@ -13,7 +13,12 @@ interface AuthContextType {
   user: User | null;
   loading: boolean;
   login: (email: string, password: string) => Promise<void>;
-  signup: (name: string, email: string, password: string, role?: string) => Promise<void>;
+  signup: (
+    name: string,
+    email: string,
+    password: string,
+    role?: string
+  ) => Promise<void>;
   logout: () => Promise<void>;
 }
 
@@ -57,7 +62,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setUser(data.user);
   };
 
-  const signup = async (name: string, email: string, password: string, role: string = "USER") => {
+  const signup = async (
+    name: string,
+    email: string,
+    password: string,
+    role: string = "USER"
+  ) => {
     const response = await fetch("/api/auth/signup", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -74,8 +84,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const logout = async () => {
-    await fetch("/api/auth/logout", { method: "POST" });
-    setUser(null);
+    try {
+      await fetch("/api/auth/logout", { method: "POST" });
+      setUser(null);
+    } catch (error) {
+      console.error("Logout error:", error);
+      setUser(null);
+    }
   };
 
   return (

@@ -47,9 +47,14 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const router = useRouter();
   const pathname = usePathname();
 
-  const handleLogout = () => {
-    logout();
-    router.push("/");
+  const handleLogout = async () => {
+    try {
+      await logout();
+      window.location.replace("/");
+    } catch (error) {
+      console.error("Logout error:", error);
+      window.location.replace("/");
+    }
   };
 
   const handleSearch = (e: React.FormEvent) => {

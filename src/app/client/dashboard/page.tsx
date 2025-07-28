@@ -105,8 +105,13 @@ export default function ClientDashboardPage() {
   };
 
   const handleLogout = async () => {
-    await logout();
-    window.location.href = "/";
+    try {
+      await logout();
+      window.location.replace("/");
+    } catch (error) {
+      console.error("Logout error:", error);
+      window.location.replace("/");
+    }
   };
 
   if (!user || user.role !== "CLIENT") {
