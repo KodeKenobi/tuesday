@@ -133,6 +133,26 @@ export default function WorkloadPage() {
     }
   };
 
+  const handleDeleteTicket = async (ticketId: string) => {
+    if (!confirm("Are you sure you want to delete this ticket?")) {
+      return;
+    }
+
+    try {
+      const response = await fetch(`/api/tickets/${ticketId}`, {
+        method: "DELETE",
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to delete ticket");
+      }
+
+      fetchTickets();
+    } catch (error) {
+      setError("Failed to delete ticket");
+    }
+  };
+
   const filteredTickets = tickets.filter((ticket) => {
     const matchesSearch =
       ticket.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -304,6 +324,16 @@ export default function WorkloadPage() {
                               <Edit className="w-4 h-4" />
                               <span className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10">
                                 Edit ticket
+                              </span>
+                            </button>
+                            <button
+                              onClick={() => handleDeleteTicket(ticket.id)}
+                              className="text-red-400 hover:text-red-300 p-1 relative group"
+                              title="Delete ticket"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                              <span className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10">
+                                Delete ticket
                               </span>
                             </button>
                             <select

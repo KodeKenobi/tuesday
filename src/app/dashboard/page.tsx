@@ -131,7 +131,11 @@ export default function DashboardPage() {
     }
   };
 
-  const handleCreateTicket = async (ticketData: { title: string; status: string; clientId?: string }) => {
+  const handleCreateTicket = async (ticketData: {
+    title: string;
+    status: string;
+    clientId?: string;
+  }) => {
     try {
       console.log("Creating ticket with data:", ticketData);
       const response = await fetch("/api/tickets", {
@@ -152,6 +156,47 @@ export default function DashboardPage() {
     } catch (error) {
       console.error("Error creating ticket:", error);
       setError("Failed to create ticket");
+    }
+  };
+
+  const handleUpdateTicket = async (
+    ticketId: string,
+    updates: Partial<Ticket>
+  ) => {
+    try {
+      const response = await fetch(`/api/tickets/${ticketId}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(updates),
+      });
+
+      if (!response.ok) throw new Error("Failed to update ticket");
+
+      const updatedTicket = await response.json();
+      setSelectedTicket(updatedTicket);
+      fetchTickets();
+    } catch (error) {
+      console.error("Error updating ticket:", error);
+      setError("Failed to update ticket");
+    }
+  };
+
+  const handleDeleteTicket = async (ticketId: string) => {
+    try {
+      const response = await fetch(`/api/tickets/${ticketId}`, {
+        method: "DELETE",
+      });
+
+      if (!response.ok) throw new Error("Failed to delete ticket");
+
+      setTickets((prev) => prev.filter((ticket) => ticket.id !== ticketId));
+      setShowTicketDetail(false);
+      setSelectedTicket(null);
+    } catch (error) {
+      console.error("Error deleting ticket:", error);
+      setError("Failed to delete ticket");
     }
   };
 
@@ -180,7 +225,8 @@ export default function DashboardPage() {
           <div>
             <h1 className="text-3xl font-bold text-white mb-2">Dashboard</h1>
             <p className="text-gray-400">
-              Welcome back, {user.name}. Here&apos;s what&apos;s happening today.
+              Welcome back, {user.name}. Here&apos;s what&apos;s happening
+              today.
             </p>
           </div>
 
@@ -466,9 +512,7 @@ export default function DashboardPage() {
               prev ? { ...prev, ...updates } : null
             );
           }}
-          onDelete={(ticketId) => {
-            console.log("Delete ticket:", ticketId);
-          }}
+          onDelete={handleDeleteTicket}
         />
       </div>
     </DashboardLayout>

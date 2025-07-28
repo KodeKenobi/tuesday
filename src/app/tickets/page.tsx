@@ -122,10 +122,29 @@ export default function TicketsPage() {
         throw new Error("Failed to update ticket");
       }
 
-      // Refresh tickets
       fetchTickets();
     } catch (error) {
       setError("Failed to update ticket status");
+    }
+  };
+
+  const handleDeleteTicket = async (ticketId: string) => {
+    if (!confirm("Are you sure you want to delete this ticket?")) {
+      return;
+    }
+
+    try {
+      const response = await fetch(`/api/tickets/${ticketId}`, {
+        method: "DELETE",
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to delete ticket");
+      }
+
+      fetchTickets();
+    } catch (error) {
+      setError("Failed to delete ticket");
     }
   };
 
@@ -257,9 +276,18 @@ export default function TicketsPage() {
                     </div>
 
                     {user.role === "USER" && (
-                      <button className="text-gray-400 hover:text-white transition-colors p-1">
-                        <MoreHorizontal className="w-4 h-4" />
-                      </button>
+                      <div className="flex items-center space-x-1">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDeleteTicket(ticket.id);
+                          }}
+                          className="text-red-400 hover:text-red-300 transition-colors p-1"
+                          title="Delete ticket"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
                     )}
                   </div>
 
