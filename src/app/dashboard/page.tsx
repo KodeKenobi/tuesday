@@ -86,12 +86,6 @@ export default function DashboardPage() {
   const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
   const [selectedView, setSelectedView] = useState<"kanban" | "list">("kanban");
 
-  useEffect(() => {
-    if (!authLoading && user) {
-      fetchTickets();
-    }
-  }, [statusFilter, authLoading, user, fetchTickets]);
-
   const fetchTickets = useCallback(async () => {
     try {
       setError("");
@@ -112,6 +106,12 @@ export default function DashboardPage() {
     }
   }, [statusFilter]);
 
+  useEffect(() => {
+    if (!authLoading && user) {
+      fetchTickets();
+    }
+  }, [statusFilter, authLoading, user, fetchTickets]);
+
   const handleStatusChange = async (ticketId: string, newStatus: string) => {
     try {
       const response = await fetch(`/api/tickets/${ticketId}`, {
@@ -124,8 +124,7 @@ export default function DashboardPage() {
 
       if (!response.ok) throw new Error("Failed to update ticket");
       fetchTickets();
-    } catch {
-    }
+    } catch {}
   };
 
   const handleCreateTicket = async (ticketData: {
@@ -150,11 +149,8 @@ export default function DashboardPage() {
 
       fetchTickets();
       setShowCreateModal(false);
-    } catch {
-    }
+    } catch {}
   };
-
-
 
   const handleDeleteTicket = async (ticketId: string) => {
     try {
@@ -167,8 +163,7 @@ export default function DashboardPage() {
       setTickets((prev) => prev.filter((ticket) => ticket.id !== ticketId));
       setShowTicketDetail(false);
       setSelectedTicket(null);
-    } catch {
-    }
+    } catch {}
   };
 
   const filteredTickets = tickets.filter((ticket) => {
