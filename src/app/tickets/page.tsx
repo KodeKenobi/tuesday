@@ -73,6 +73,7 @@ export default function TicketsPage() {
   const { user } = useAuth();
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   const [statusFilter, setStatusFilter] = useState<string>("");
   const [searchQuery, setSearchQuery] = useState("");
@@ -80,6 +81,7 @@ export default function TicketsPage() {
 
   const fetchTickets = useCallback(async () => {
     try {
+      setError("");
       const params = new URLSearchParams();
       if (statusFilter) {
         params.append("status", statusFilter);
@@ -94,6 +96,7 @@ export default function TicketsPage() {
       const data = await response.json();
       setTickets(data);
     } catch {
+      setError("Failed to fetch tickets");
     } finally {
       setLoading(false);
     }

@@ -76,18 +76,14 @@ export default function WorkloadPage() {
   const { user, loading: authLoading } = useAuth();
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   const [statusFilter, setStatusFilter] = useState<string>("");
   const [searchQuery, setSearchQuery] = useState("");
 
-  useEffect(() => {
-    if (!authLoading && user) {
-      fetchTickets();
-    }
-  }, [statusFilter, authLoading, user, fetchTickets]);
-
   const fetchTickets = useCallback(async () => {
     try {
+      setError("");
       const params = new URLSearchParams();
       if (statusFilter) {
         params.append("status", statusFilter);
@@ -108,10 +104,17 @@ export default function WorkloadPage() {
 
       setTickets(filteredTickets);
     } catch {
+      setError("Failed to fetch tickets");
     } finally {
       setLoading(false);
     }
   }, [statusFilter, user]);
+
+  useEffect(() => {
+    if (!authLoading && user) {
+      fetchTickets();
+    }
+  }, [statusFilter, authLoading, user, fetchTickets]);
 
   const handleStatusChange = async (ticketId: string, newStatus: string) => {
     try {
@@ -128,8 +131,7 @@ export default function WorkloadPage() {
       }
 
       fetchTickets();
-    } catch {
-    }
+    } catch {}
   };
 
   const handleDeleteTicket = async (ticketId: string) => {
@@ -147,8 +149,7 @@ export default function WorkloadPage() {
       }
 
       fetchTickets();
-    } catch {
-    }
+    } catch {}
   };
 
   const filteredTickets = tickets.filter((ticket) => {
