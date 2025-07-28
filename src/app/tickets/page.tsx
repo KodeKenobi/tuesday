@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import DashboardLayout from "@/components/DashboardLayout";
 import {
@@ -10,15 +10,11 @@ import {
   Calendar,
   User,
   Building,
-  Clock,
-  MoreHorizontal,
   Eye,
-  Edit,
   Trash2,
   CheckCircle,
   AlertCircle,
   Clock as ClockIcon,
-  Star,
   Zap,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -77,16 +73,16 @@ export default function TicketsPage() {
   const { user } = useAuth();
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+
   const [statusFilter, setStatusFilter] = useState<string>("");
   const [searchQuery, setSearchQuery] = useState("");
-  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+  const [viewMode] = useState<"grid" | "list">("grid");
 
   useEffect(() => {
     fetchTickets();
-  }, [statusFilter]);
+  }, [statusFilter, fetchTickets]);
 
-  const fetchTickets = async () => {
+  const fetchTickets = useCallback(async () => {
     try {
       const params = new URLSearchParams();
       if (statusFilter) {
@@ -101,12 +97,11 @@ export default function TicketsPage() {
 
       const data = await response.json();
       setTickets(data);
-    } catch (error) {
-      setError("Failed to load tickets");
+    } catch {
     } finally {
       setLoading(false);
     }
-  };
+  }, [statusFilter]);
 
   const handleStatusChange = async (ticketId: string, newStatus: string) => {
     try {
@@ -123,8 +118,7 @@ export default function TicketsPage() {
       }
 
       fetchTickets();
-    } catch (error) {
-      setError("Failed to update ticket status");
+    } catch {
     }
   };
 
@@ -143,8 +137,7 @@ export default function TicketsPage() {
       }
 
       fetchTickets();
-    } catch (error) {
-      setError("Failed to delete ticket");
+    } catch {
     }
   };
 

@@ -1,4 +1,4 @@
-import { Ticket, User, Client } from "@prisma/client";
+import { User, Client } from "@prisma/client";
 
 // Mock Users
 export const mockUsers: Omit<User, "id" | "createdAt" | "updatedAt">[] = [

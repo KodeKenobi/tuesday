@@ -31,7 +31,7 @@ async function seedDatabase() {
     // Create a test user account for easy login
     console.log("🔑 Creating test user account...");
     const testUserPassword = await hashPassword("test123");
-    const testUser = await prisma.user.create({
+    await prisma.user.create({
       data: {
         email: "test@example.com",
         password: testUserPassword,

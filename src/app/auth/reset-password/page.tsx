@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, Suspense } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import {
   Lock,
@@ -27,7 +27,7 @@ function ResetPasswordContent() {
   const [tokenValid, setTokenValid] = useState(false);
   const [validating, setValidating] = useState(true);
 
-  const router = useRouter();
+
   const searchParams = useSearchParams();
 
   useEffect(() => {

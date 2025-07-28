@@ -3,12 +3,10 @@
 import Link from "next/link";
 import { motion } from "framer-motion";
 import {
-  Search,
   CheckCircle,
   Users,
   BarChart3,
   ArrowRight,
-  Sparkles,
   Zap,
   Shield,
 } from "lucide-react";

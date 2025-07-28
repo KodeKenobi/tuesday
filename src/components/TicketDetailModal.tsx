@@ -12,7 +12,7 @@ import {
   Building,
   FileText,
 } from "lucide-react";
-import { cn } from "@/lib/utils";
+
 
 interface Ticket {
   id: string;
@@ -93,9 +93,7 @@ export default function TicketDetailModal({
 
   if (!isOpen || !ticket) return null;
 
-  const status = statusConfig[ticket.status as keyof typeof statusConfig];
-  const StatusIcon = status.icon;
-
+  
   const handleStatusChange = (newStatus: string) => {
     onStatusChange(ticket.id, newStatus);
   };

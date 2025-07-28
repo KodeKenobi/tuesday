@@ -14,7 +14,6 @@ import {
   AlertCircle,
   CheckCircle,
   Users,
-  Calendar,
   BarChart3,
 } from "lucide-react";
 import { motion } from "framer-motion";

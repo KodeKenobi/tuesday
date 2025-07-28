@@ -18,8 +18,6 @@ import {
   User,
   ChevronDown,
   Zap,
-  TrendingUp,
-  Calendar,
   Power,
 } from "lucide-react";
 import { cn } from "@/lib/utils";

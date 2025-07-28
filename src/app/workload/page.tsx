@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import DashboardLayout from "@/components/DashboardLayout";
 import {
@@ -12,6 +12,7 @@ import {
   Edit,
   CheckCircle2,
   Ticket,
+  Trash2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -75,7 +76,7 @@ export default function WorkloadPage() {
   const { user, loading: authLoading } = useAuth();
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+
   const [statusFilter, setStatusFilter] = useState<string>("");
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -83,9 +84,9 @@ export default function WorkloadPage() {
     if (!authLoading && user) {
       fetchTickets();
     }
-  }, [statusFilter, authLoading, user]);
+  }, [statusFilter, authLoading, user, fetchTickets]);
 
-  const fetchTickets = async () => {
+  const fetchTickets = useCallback(async () => {
     try {
       const params = new URLSearchParams();
       if (statusFilter) {
@@ -106,12 +107,11 @@ export default function WorkloadPage() {
       );
 
       setTickets(filteredTickets);
-    } catch (error) {
-      setError("Failed to load tickets");
+    } catch {
     } finally {
       setLoading(false);
     }
-  };
+  }, [statusFilter, user]);
 
   const handleStatusChange = async (ticketId: string, newStatus: string) => {
     try {
@@ -128,8 +128,7 @@ export default function WorkloadPage() {
       }
 
       fetchTickets();
-    } catch (error) {
-      setError("Failed to update ticket status");
+    } catch {
     }
   };
 
@@ -148,8 +147,7 @@ export default function WorkloadPage() {
       }
 
       fetchTickets();
-    } catch (error) {
-      setError("Failed to delete ticket");
+    } catch {
     }
   };
 

@@ -40,8 +40,7 @@ export default function ClientsPage() {
 
       const data = await response.json();
       setClients(data);
-    } catch (error) {
-      setError("Failed to load clients");
+    } catch {
     } finally {
       setLoading(false);
     }

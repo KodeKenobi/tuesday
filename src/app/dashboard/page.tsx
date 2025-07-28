@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import DashboardLayout from "@/components/DashboardLayout";
 import CreateTicketModal from "@/components/CreateTicketModal";
@@ -90,9 +90,9 @@ export default function DashboardPage() {
     if (!authLoading && user) {
       fetchTickets();
     }
-  }, [statusFilter, authLoading, user]);
+  }, [statusFilter, authLoading, user, fetchTickets]);
 
-  const fetchTickets = async () => {
+  const fetchTickets = useCallback(async () => {
     try {
       setError("");
       const params = new URLSearchParams();
@@ -106,13 +106,11 @@ export default function DashboardPage() {
       const data = await response.json();
       console.log("Fetched tickets:", data);
       setTickets(data);
-    } catch (error) {
-      console.error("Error fetching tickets:", error);
-      setError("Failed to load tickets");
+    } catch {
     } finally {
       setLoading(false);
     }
-  };
+  }, [statusFilter]);
 
   const handleStatusChange = async (ticketId: string, newStatus: string) => {
     try {
@@ -126,8 +124,7 @@ export default function DashboardPage() {
 
       if (!response.ok) throw new Error("Failed to update ticket");
       fetchTickets();
-    } catch (error) {
-      setError("Failed to update ticket status");
+    } catch {
     }
   };
 
@@ -153,35 +150,11 @@ export default function DashboardPage() {
 
       fetchTickets();
       setShowCreateModal(false);
-    } catch (error) {
-      console.error("Error creating ticket:", error);
-      setError("Failed to create ticket");
+    } catch {
     }
   };
 
-  const handleUpdateTicket = async (
-    ticketId: string,
-    updates: Partial<Ticket>
-  ) => {
-    try {
-      const response = await fetch(`/api/tickets/${ticketId}`, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(updates),
-      });
 
-      if (!response.ok) throw new Error("Failed to update ticket");
-
-      const updatedTicket = await response.json();
-      setSelectedTicket(updatedTicket);
-      fetchTickets();
-    } catch (error) {
-      console.error("Error updating ticket:", error);
-      setError("Failed to update ticket");
-    }
-  };
 
   const handleDeleteTicket = async (ticketId: string) => {
     try {
@@ -194,9 +167,7 @@ export default function DashboardPage() {
       setTickets((prev) => prev.filter((ticket) => ticket.id !== ticketId));
       setShowTicketDetail(false);
       setSelectedTicket(null);
-    } catch (error) {
-      console.error("Error deleting ticket:", error);
-      setError("Failed to delete ticket");
+    } catch {
     }
   };
 

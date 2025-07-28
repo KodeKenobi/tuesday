@@ -6,9 +6,6 @@ import {
   CheckCircle,
   AlertCircle,
   Clock,
-  User,
-  LogOut,
-  Zap,
   Ticket,
   Sparkles,
   ArrowRight,
@@ -67,8 +64,8 @@ const statusIcons = {
 export default function ClientDashboardPage() {
   const { user, logout } = useAuth();
   const [tickets, setTickets] = useState<Ticket[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+    const [loading, setLoading] = useState(true);
+
 
   useEffect(() => {
     fetchTickets();
@@ -84,8 +81,7 @@ export default function ClientDashboardPage() {
 
       const data = await response.json();
       setTickets(data);
-    } catch (error) {
-      setError("Failed to load tickets");
+    } catch {
     } finally {
       setLoading(false);
     }
@@ -106,8 +102,7 @@ export default function ClientDashboardPage() {
       }
 
       fetchTickets();
-    } catch (error) {
-      setError("Failed to update ticket status");
+    } catch {
     }
   };
 
@@ -255,13 +250,7 @@ export default function ClientDashboardPage() {
           </div>
         </div>
 
-        {/* Error message */}
-        {error && (
-          <div className="mb-6 p-4 bg-red-500/10 border border-red-500/20 rounded-xl flex items-center space-x-3 backdrop-blur-xl">
-            <AlertCircle className="w-5 h-5 text-red-400 flex-shrink-0" />
-            <p className="text-red-400 text-sm">{error}</p>
-          </div>
-        )}
+
 
         {/* Tickets */}
         {loading ? (
