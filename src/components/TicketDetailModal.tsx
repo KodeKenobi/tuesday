@@ -13,7 +13,6 @@ import {
   FileText,
 } from "lucide-react";
 
-
 interface Ticket {
   id: string;
   title: string;
@@ -35,6 +34,10 @@ interface Ticket {
     name: string;
     email: string;
   };
+  team?: {
+    id: string;
+    name: string;
+  } | null;
 }
 
 interface TicketDetailModalProps {
@@ -43,7 +46,17 @@ interface TicketDetailModalProps {
   onClose: () => void;
   onStatusChange: (ticketId: string, newStatus: string) => void;
   onDelete?: (ticketId: string) => void;
-  onUpdate?: (ticketId: string, updates: Partial<Ticket>) => void;
+  onUpdate?: (
+    ticketId: string,
+    updates: Partial<Ticket> & { assigneeId?: string | null },
+  ) => void;
+  user: {
+    id: string;
+    name: string;
+    email: string;
+    role: string;
+    teamId?: string | null;
+  };
 }
 
 const statusConfig = {
@@ -67,9 +80,9 @@ const statusConfig = {
   },
   CLIENT_REVIEW: {
     label: "Client Review",
-    color: "bg-purple-500/20 text-purple-400 border-purple-500/30",
+    color: "bg-indigo-500/20 text-indigo-400 border-indigo-500/30",
     icon: Eye,
-    bgColor: "bg-purple-500/10",
+    bgColor: "bg-indigo-500/10",
   },
   COMPLETE: {
     label: "Complete",
@@ -86,6 +99,7 @@ export default function TicketDetailModal({
   onStatusChange,
   onDelete,
   onUpdate,
+  user,
 }: TicketDetailModalProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [editData, setEditData] = useState<Partial<Ticket>>({});
@@ -93,7 +107,6 @@ export default function TicketDetailModal({
 
   if (!isOpen || !ticket) return null;
 
-  
   const handleStatusChange = (newStatus: string) => {
     onStatusChange(ticket.id, newStatus);
   };
@@ -118,7 +131,7 @@ export default function TicketDetailModal({
 
   const handleSave = async () => {
     if (!onUpdate) return;
-    
+
     setIsSaving(true);
     try {
       await onUpdate(ticket.id, editData);
@@ -138,10 +151,10 @@ export default function TicketDetailModal({
         onClick={onClose}
       />
 
-      <div className="relative w-full max-w-2xl bg-gray-900/95 backdrop-blur-xl rounded-2xl border border-gray-800/50 shadow-2xl animate-fade-in">
-        <div className="flex items-center justify-between p-6 border-b border-gray-800/50">
+      <div className="relative w-full max-w-2xl bg-white/95 backdrop-blur-xl rounded-2xl border border-gray-200 shadow-2xl animate-fade-in">
+        <div className="flex items-center justify-between p-6 border-b border-gray-200">
           <div className="flex items-center space-x-4">
-            <div className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-lg flex items-center justify-center">
+            <div className="w-10 h-10 bg-gradient-to-br from-sky-500 to-indigo-600 rounded-lg flex items-center justify-center">
               <FileText className="w-5 h-5 text-white" />
             </div>
             <div className="flex-1">
@@ -155,14 +168,14 @@ export default function TicketDetailModal({
                       title: e.target.value,
                     }))
                   }
-                  className="text-xl font-bold text-white bg-transparent border-b border-gray-600 focus:border-indigo-500 focus:outline-none w-full"
+                  className="text-xl font-bold text-slate-900 bg-transparent border-b border-gray-300 focus:border-indigo-500 focus:outline-none w-full"
                 />
               ) : (
-                <h2 className="text-xl font-bold text-white line-clamp-1">
+                <h2 className="text-xl font-bold text-slate-900 line-clamp-1">
                   {ticket.title}
                 </h2>
               )}
-              <p className="text-sm text-gray-400">
+              <p className="text-sm text-gray-500">
                 Created by {ticket.creator.name} •{" "}
                 {new Date(ticket.createdAt).toLocaleDateString()}
               </p>
@@ -172,7 +185,7 @@ export default function TicketDetailModal({
           <div className="flex items-center space-x-2">
             <button
               onClick={handleEditToggle}
-              className="text-gray-400 hover:text-white transition-colors p-2 hover:bg-gray-800/50 rounded-lg"
+              className="text-gray-700 hover:text-gray-900 transition-colors p-2 hover:bg-gray-100 rounded-lg"
               title={isEditing ? "Cancel edit" : "Edit ticket"}
             >
               <Edit className="w-4 h-4" />
@@ -181,11 +194,11 @@ export default function TicketDetailModal({
               <button
                 onClick={handleSave}
                 disabled={isSaving}
-                className="text-green-400 hover:text-green-300 transition-colors p-2 hover:bg-green-500/10 rounded-lg disabled:opacity-50"
+                className="text-green-600 hover:text-green-700 transition-colors p-2 hover:bg-green-50 rounded-lg disabled:opacity-50"
                 title="Save changes"
               >
                 {isSaving ? (
-                  <div className="w-4 h-4 border-2 border-green-400 border-t-transparent rounded-full animate-spin" />
+                  <div className="w-4 h-4 border-2 border-green-600 border-t-transparent rounded-full animate-spin" />
                 ) : (
                   <CheckCircle className="w-4 h-4" />
                 )}
@@ -194,7 +207,7 @@ export default function TicketDetailModal({
             {onDelete && (
               <button
                 onClick={handleDelete}
-                className="text-red-400 hover:text-red-300 transition-colors p-2 hover:bg-red-500/10 rounded-lg"
+                className="text-red-600 hover:text-red-700 transition-colors p-2 hover:bg-red-50 rounded-lg"
                 title="Delete ticket"
               >
                 <X className="w-4 h-4" />
@@ -202,7 +215,7 @@ export default function TicketDetailModal({
             )}
             <button
               onClick={onClose}
-              className="text-gray-400 hover:text-white transition-colors p-3 hover:bg-gray-800/50 rounded-lg hover:scale-110 border border-gray-700/50 hover:border-gray-600/50"
+              className="text-gray-700 hover:text-gray-900 transition-colors p-3 hover:bg-gray-100 rounded-lg hover:scale-110 border border-gray-200"
               title="Close"
             >
               <X className="w-6 h-6" />
@@ -214,13 +227,13 @@ export default function TicketDetailModal({
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <div className="space-y-6">
               <div>
-                <h3 className="text-sm font-medium text-gray-400 mb-3 uppercase tracking-wide">
+                <h3 className="text-sm font-medium text-gray-500 mb-3 uppercase tracking-wide">
                   Status
                 </h3>
                 <select
                   value={ticket.status}
                   onChange={(e) => handleStatusChange(e.target.value)}
-                  className="w-full bg-gray-800/50 border border-gray-700/50 rounded-lg px-3 py-2 text-white focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition-all"
+                  className="w-full bg-white border border-gray-300 rounded-lg px-3 py-2 text-gray-900 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition-all"
                 >
                   {Object.entries(statusConfig).map(([key, config]) => (
                     <option key={key} value={key}>
@@ -231,20 +244,20 @@ export default function TicketDetailModal({
               </div>
 
               <div>
-                <h3 className="text-sm font-medium text-gray-400 mb-3 uppercase tracking-wide">
+                <h3 className="text-sm font-medium text-gray-500 mb-3 uppercase tracking-wide">
                   Client
                 </h3>
                 <div className="flex items-center space-x-3">
                   {ticket.client ? (
                     <>
-                      <div className="w-8 h-8 bg-purple-500 rounded-full flex items-center justify-center">
+                      <div className="w-8 h-8 bg-indigo-500 rounded-full flex items-center justify-center">
                         <Building className="w-4 h-4 text-white" />
                       </div>
                       <div>
-                        <p className="text-white text-sm font-medium">
+                        <p className="text-slate-900 text-sm font-medium">
                           {ticket.client.name}
                         </p>
-                        <p className="text-gray-400 text-xs">
+                        <p className="text-gray-500 text-xs">
                           {ticket.client.email}
                         </p>
                       </div>
@@ -256,23 +269,65 @@ export default function TicketDetailModal({
                   )}
                 </div>
               </div>
+
+              <div>
+                <h3 className="text-sm font-medium text-gray-500 mb-3 uppercase tracking-wide">
+                  Assignee
+                </h3>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-3">
+                    {ticket.assignee ? (
+                      <>
+                        <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center">
+                          <span className="text-white text-xs font-bold">
+                            {ticket.assignee.name.charAt(0).toUpperCase()}
+                          </span>
+                        </div>
+                        <div>
+                          <p className="text-slate-900 text-sm font-medium">
+                            {ticket.assignee.name}
+                          </p>
+                          <p className="text-gray-500 text-xs">
+                            {ticket.assignee.email}
+                          </p>
+                        </div>
+                      </>
+                    ) : (
+                      <p className="text-gray-500 text-sm italic">Unassigned</p>
+                    )}
+                  </div>
+                  {(user.role === "USER" || user.role === "SUPER_ADMIN") &&
+                    ticket.assignee?.id !== user.id && (
+                      <button
+                        type="button"
+                        onClick={() =>
+                          onUpdate &&
+                          onUpdate(ticket.id, { assigneeId: user.id })
+                        }
+                        className="text-indigo-600 hover:text-indigo-700 text-sm font-medium transition-colors"
+                      >
+                        Assign to me
+                      </button>
+                    )}
+                </div>
+              </div>
             </div>
 
             <div className="space-y-6">
               <div>
-                <h3 className="text-sm font-medium text-gray-400 mb-3 uppercase tracking-wide">
+                <h3 className="text-sm font-medium text-gray-500 mb-3 uppercase tracking-wide">
                   Dates
                 </h3>
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
-                    <span className="text-gray-400 text-sm">Created:</span>
-                    <span className="text-white text-sm">
+                    <span className="text-gray-500 text-sm">Created:</span>
+                    <span className="text-slate-900 text-sm">
                       {new Date(ticket.createdAt).toLocaleDateString()}
                     </span>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-gray-400 text-sm">Updated:</span>
-                    <span className="text-white text-sm">
+                    <span className="text-gray-500 text-sm">Updated:</span>
+                    <span className="text-slate-900 text-sm">
                       {new Date(ticket.updatedAt).toLocaleDateString()}
                     </span>
                   </div>

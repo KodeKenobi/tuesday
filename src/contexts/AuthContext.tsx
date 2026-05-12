@@ -7,6 +7,9 @@ interface User {
   name: string;
   email: string;
   role: string;
+  teamId?: string | null;
+  /** null when super admin (all teams); array for scoped employees */
+  teamIds?: string[] | null;
 }
 
 interface AuthContextType {

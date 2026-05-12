@@ -1,217 +1,201 @@
-# ClickDown - Ticket Management MVP
+# 🛠️ Internal Project & Portfolio Management Tool
 
-A simple, elegant ticket management system built with Next.js, TypeScript, and Prisma. This MVP is designed to test basic CRUD capabilities, user role handling, simple status workflows, clean UI design, and developer understanding of permissions and flows.
+### Internal Ticket Tracking & Project Coordination
 
-## 🎯 Core Features (Nothing More)
+This is a departmental tool designed to manage project workflows, track tickets, and facilitate coordination between internal teams and project stakeholders. It provides a centralized hub for portfolio management, featuring robust role-based access control and a dynamic Kanban interface.
 
-- ✅ **Dashboard** - View all tickets with filtering
-- ✅ **Tickets** - Minimal fields (Title, Client, Status only)
-- ✅ **5 Simple Statuses** - Backlog, In Progress, Revisions, Client Review, Complete
-- ✅ **Client Portal** - Login and ticket management for clients
-- ✅ **User Authentication** - Simple email/password with role-based access
+---
 
-## 🚀 Getting Started
+## 📋 Table of Contents
+
+- [🚀 Quick Start Guide](#-quick-start-guide)
+- [✨ Key Features](#-key-features)
+- [🛠 Tech Stack](#-tech-stack)
+- [📥 Installation & Local Setup](#-installation--local-setup)
+- [🗄️ Database Architecture & Management](#-database-architecture--management)
+- [🔐 Authentication & Role-Based Access](#-authentication--role-based-access)
+- [📡 API Documentation](#-api-documentation)
+- [📁 Comprehensive Project Structure](#-comprehensive-project-structure)
+- [🚢 Deployment Strategies](#-deployment-strategies)
+- [🧪 Testing & Quality Assurance](#-testing--quality-assurance)
+- [🔧 Troubleshooting & FAQ](#-troubleshooting--faq)
+
+---
+
+## 🚀 Quick Start Guide
+
+Follow these exact steps to get the tool running on your local machine.
+
+> [!IMPORTANT]
+> **Working Directory**: All commands must be executed from the **root** folder of the project.
+
+```bash
+# 1. Install dependencies
+pnpm install
+
+# 2. Setup environment (SQLite is default)
+cp .env.example .env.local
+
+# 3. Generate the Prisma Client
+pnpm prisma generate
+
+# 4. Initialize the database
+pnpm prisma db push
+
+# 5. Seed the database with sample data
+pnpm db:seed
+
+# 6. Start the development server
+pnpm run dev
+```
+
+Visit: [http://localhost:3000](http://localhost:3000)
+
+---
+
+## ✨ Key Features
+
+### 🏢 Team & Stakeholder Coordination
+- **Dedicated Portals**: Separate dashboards for Internal Staff and Project Stakeholders.
+- **Access Control**: Stakeholders only see tickets relevant to their specific projects/departments.
+- **Approval Workflow**: Stakeholders can directly flag tickets for "Revisions" or mark as "Complete".
+
+### 📊 Project & Ticket Management
+- **Kanban Workflow**: 5-stage status pipeline (Backlog → In Progress → Revisions → Stakeholder Review → Complete).
+- **Portfolio Overview**: High-level tracking of multiple projects across different teams.
+- **Audit Logs**: Full transparency with automated tracking of all system actions.
+
+---
+
+## 🛠 Tech Stack
+
+| Layer | Technology |
+|-------|------------|
+| **Framework** | [Next.js 15](https://nextjs.org/) (App Router) |
+| **Language** | [TypeScript](https://www.typescriptlang.org/) |
+| **Styling** | [Tailwind CSS 4](https://tailwindcss.com/) |
+| **Database/ORM** | [Prisma](https://www.prisma.io/) with SQLite/PostgreSQL |
+| **Drag & Drop** | [@dnd-kit](https://dndkit.com/) |
+
+---
+
+## 📥 Installation & Local Setup
 
 ### Prerequisites
+- **Node.js**: v18.0.0 or higher.
+- **Package Manager**: `pnpm` is required.
 
-- Node.js 18+
-- npm or yarn
-
-### Installation
-
-1. Clone the repository
-
+### 1. Environment Configuration
+Create your local environment file:
 ```bash
-git clone <repository-url>
-cd ClickDown
+cp .env.example .env.local
 ```
+- For local development, the SQLite configuration is pre-set.
+- Set a unique `JWT_SECRET` for session security.
 
-2. Install dependencies
-
+### 2. Database Initialization
+Ensure the database is synced and seeded with the initial department structure:
 ```bash
-npm install
+pnpm prisma generate
+pnpm prisma db push
+pnpm db:seed
 ```
 
-3. Set up the database
+---
 
+## 🗄️ Database Architecture & Management
+
+### The Schema
+The system organizes work into the following hierarchy:
+- **Portfolio**: High-level strategic groupings.
+- **Project**: Specific initiatives within a Portfolio.
+- **Team**: Departments responsible for work (e.g., Dev, Sales, Marketing).
+- **Ticket**: Individual tasks with statuses and assignees.
+
+### Management Commands
+| Command | Action |
+|---------|--------|
+| `pnpm prisma db push` | Syncs schema changes to the local SQLite DB. |
+| `pnpm db:migrate` | Generates SQL migrations for production. |
+| `pnpm prisma studio` | Visual data explorer for all models. |
+
+---
+
+## 🔐 Authentication & Role-Based Access
+
+Access is managed through three distinct roles:
+
+1. **SUPER_ADMIN**: 
+   - Global visibility across all Portfolios, Projects, and Teams.
+   - Typically reserved for Department Heads or System Admins.
+2. **USER (Internal Staff)**:
+   - Manage tickets and project execution within assigned teams.
+3. **CLIENT (Stakeholders)**:
+   - External or internal partners who review and approve deliverables.
+   - Limited to the Stakeholder Portal.
+
+---
+
+## 📡 API Documentation
+
+### Auth
+- `POST /api/auth/login`: Session creation via secure cookie.
+- `GET /api/auth/me`: Current user state retrieval.
+
+### Projects & Tickets
+- `GET /api/tickets`: Role-filtered ticket list.
+- `PATCH /api/tickets/[id]`: Status updates and assignment changes.
+- `GET /api/projects`: List of active projects within the current scope.
+
+---
+
+## 📁 Comprehensive Project Structure
+
+```text
+├── prisma/               # Schema, migrations, and SQLite DB
+├── src/
+│   ├── app/              # Next.js App Router (Pages & API)
+│   ├── components/       # UI Components (Kanban, Modals, Shared)
+│   ├── contexts/         # State providers (Auth, Team, Theme)
+│   ├── lib/              # Logic, DB Client, and Access Control
+│   └── scripts/          # DB seeding and automation
+└── package.json          # Dependency and script definitions
+```
+
+---
+
+## 🚢 Deployment Strategies
+
+### Standard Build
+1. Set `DATABASE_URL` to your production instance (PostgreSQL).
+2. Run `pnpm build`.
+3. Start the node server: `pnpm start`.
+
+### Docker
+A `Dockerfile` is provided for containerized deployment:
 ```bash
-npx prisma db push
+pnpm docker:build
+pnpm docker:run
 ```
 
-4. Start the development server
+---
 
-```bash
-npm run dev
-```
+## 🧪 Testing & Quality Assurance
 
-5. Open [http://localhost:3000](http://localhost:3000) in your browser
+- **Linting**: `pnpm run lint`
+- **Type Checking**: `pnpm run type-check`
+- **Unit Tests**: `pnpm run test`
 
-## 🏗️ Architecture
+---
 
-### Tech Stack
+## 🔧 Troubleshooting & FAQ
 
-- **Frontend**: Next.js 15, React 19, TypeScript
-- **Styling**: Tailwind CSS with custom dark theme
-- **Database**: SQLite with Prisma ORM
-- **Authentication**: Cookie-based sessions
-- **Icons**: Lucide React
+### Error: "Cannot find module '.prisma/client/default'"
+**Solution**: This indicates the generated Prisma client is missing. Run `pnpm prisma generate`.
 
-### Project Structure
+### No data is showing up!
+**Solution**: Ensure you have run `pnpm db:seed` to populate the initial department and project data.
 
-```
-src/
-├── app/                    # Next.js app router
-│   ├── api/               # API routes
-│   │   ├── auth/          # Authentication endpoints
-│   │   ├── tickets/       # Ticket management
-│   │   └── clients/       # Client management
-│   ├── auth/              # Authentication pages
-│   ├── dashboard/         # User dashboard
-│   ├── workload/          # User workload view
-│   ├── tickets/           # Tickets management
-│   ├── clients/           # Client management
-│   └── client/            # Client portal
-├── components/            # Reusable components
-├── contexts/              # React contexts
-└── lib/                   # Utility functions
-```
+---
 
-## 🎨 Design System
-
-### Color Palette
-
-- **Background**: Dark theme with glass morphism
-- **Primary**: Indigo (#6366F1)
-- **Secondary**: Purple (#8B5CF6)
-- **Status Colors**:
-  - **Backlog**: Gray (#6B7280)
-  - **In Progress**: Blue (#3B82F6)
-  - **Revisions**: Yellow (#FACC15)
-  - **Client Review**: Purple (#8B5CF6)
-  - **Complete**: Green (#22C55E)
-
-## 🔐 Authentication
-
-### User Roles
-
-- **USER**: Agency/Editor with full access to create and manage tickets
-- **CLIENT**: Client with limited access to assigned tickets only
-
-### API Endpoints
-
-- `POST /api/auth/login` - User login
-- `POST /api/auth/signup` - User registration
-- `POST /api/auth/logout` - User logout
-- `GET /api/auth/me` - Get current user
-- `GET /api/tickets` - List tickets (filtered by role)
-- `POST /api/tickets` - Create ticket
-- `PATCH /api/tickets/:id` - Update ticket status
-- `GET /api/clients` - List clients
-- `POST /api/clients` - Create client
-
-## 📋 Ticket Workflow
-
-### Ticket Fields
-
-- **Title** (required)
-- **Client** (optional, must be invited)
-- **Status** (defaults to Backlog)
-
-### Status Transitions
-
-1. **Backlog** → **In Progress**
-2. **In Progress** → **Client Review**
-3. **Client Review** → **Complete** or **Revisions** (set by client)
-4. **Revisions** → **In Progress**
-5. **In Progress** → **Complete** (if no client assigned)
-
-### Role-Based Permissions
-
-- **Users** can move tickets between any status
-- **Clients** can only mark tickets as Complete or request Revisions when in Client Review status
-- **Clients** cannot edit or delete tickets
-
-## 🎯 Page Descriptions
-
-### Dashboard (User)
-
-- Shows all tickets in column view (Title, Status, Client)
-- Quick "Create Ticket" button
-- Filter by status
-- No metrics, no notifications
-
-### Workload (User)
-
-- Shows tickets assigned to the current user or created by them
-- List view by status
-- Filter by status
-- No additional widgets
-
-### Tickets (User)
-
-- Grid/list view of all tickets
-- Create new tickets
-- Update ticket status
-- Assign tickets to invited clients
-
-### Clients (User)
-
-- Manage client records (Name, Email)
-- Optional invitation system
-- Non-invited clients exist for filtering only
-
-### Client Portal
-
-- Login screen for clients
-- View only tickets assigned to their company
-- Mark tickets as Complete or request Revisions
-- Cannot edit or delete tickets
-
-## 🎯 MVP Goals
-
-This MVP demonstrates:
-
-- ✅ Clean authentication system with role-based access
-- ✅ Simple ticket workflow with 5 statuses
-- ✅ Client portal functionality
-- ✅ Modern, dark UI design inspired by ClickUp
-- ✅ Responsive layout
-- ✅ TypeScript implementation
-- ✅ Database integration with Prisma
-
-## 🚧 Development
-
-### Database Schema
-
-The system uses Prisma with SQLite:
-
-- **User**: Authentication and role management
-- **Client**: Client records and invitation status
-- **Ticket**: Core ticket data with relationships
-
-### Key Components
-
-- **DashboardLayout**: Main layout with sidebar navigation
-- **CreateTicketModal**: Modal for creating new tickets
-- **TicketDetailModal**: Modal for viewing ticket details
-- **KanbanBoard**: Drag-and-drop ticket management
-- **AuthContext**: Global authentication state
-
-## 📝 Notes
-
-- This is intentionally a "dirt simple" MVP for testing purposes
-- No complex features like descriptions, comments, attachments, or activity logs
-- Focus is on clean code structure and basic CRUD operations
-- UI design follows modern dark theme patterns
-- All authentication is cookie-based for simplicity
-
-## 🎯 Acceptance Criteria
-
-- ✅ Clean login system with User and Client roles
-- ✅ User dashboard showing tickets
-- ✅ Ability to create tickets with just title, client, and status
-- ✅ Ability to create clients
-- ✅ Client dashboard to see their tickets
-- ✅ Clients can mark tickets Complete or Needs Revisions
-- ✅ 5 statuses with basic transitions
-- ✅ No metrics, no notifications
+**Internal Tooling - Managed by Engineering**

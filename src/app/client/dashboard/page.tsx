@@ -15,6 +15,15 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
+interface ClientProject {
+  id: string;
+  name: string;
+  progress: number;
+  health: string;
+  team: { name: string };
+  _count: { tickets: number; milestones: number };
+}
+
 interface Ticket {
   id: string;
   title: string;
@@ -41,7 +50,7 @@ const statusColors = {
   BACKLOG: "bg-gray-500/10 text-gray-400 border-gray-500/20",
   IN_PROGRESS: "bg-blue-500/10 text-blue-400 border-blue-500/20",
   REVISIONS: "bg-yellow-500/10 text-yellow-400 border-yellow-500/20",
-  CLIENT_REVIEW: "bg-purple-500/10 text-purple-400 border-purple-500/20",
+  CLIENT_REVIEW: "bg-indigo-500/10 text-indigo-400 border-indigo-500/20",
   COMPLETE: "bg-green-500/10 text-green-400 border-green-500/20",
 };
 
@@ -64,10 +73,15 @@ const statusIcons = {
 export default function ClientDashboardPage() {
   const { user, logout } = useAuth();
   const [tickets, setTickets] = useState<Ticket[]>([]);
+  const [projects, setProjects] = useState<ClientProject[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetchTickets();
+    fetch("/api/client/projects")
+      .then((r) => (r.ok ? r.json() : []))
+      .then(setProjects)
+      .catch(() => setProjects([]));
   }, []);
 
   const fetchTickets = async () => {
@@ -183,7 +197,7 @@ export default function ClientDashboardPage() {
         {/* Page header */}
         <div className="mb-8">
           <div className="flex items-center space-x-4 mb-6">
-            <div className="w-16 h-16 bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 rounded-2xl flex items-center justify-center shadow-xl">
+            <div className="w-16 h-16 bg-gradient-to-br from-sky-500 via-indigo-500 to-blue-500 rounded-2xl flex items-center justify-center shadow-xl">
               <Ticket className="w-8 h-8 text-white" />
             </div>
             <div>
@@ -195,6 +209,34 @@ export default function ClientDashboardPage() {
               </p>
             </div>
           </div>
+
+          {projects.length > 0 && (
+            <div className="mb-10">
+              <h2 className="text-lg font-semibold text-white mb-3">
+                Your projects
+              </h2>
+              <div className="grid gap-3 md:grid-cols-2">
+                {projects.map((p) => (
+                  <div
+                    key={p.id}
+                    className="rounded-xl border border-gray-800/80 bg-gray-900/40 p-4"
+                  >
+                    <p className="font-medium text-white">{p.name}</p>
+                    <p className="text-xs text-gray-500 mt-1">{p.team.name}</p>
+                    <div className="mt-2 h-1.5 w-full rounded-full bg-gray-800">
+                      <div
+                        className="h-full rounded-full bg-sky-500"
+                        style={{ width: `${p.progress}%` }}
+                      />
+                    </div>
+                    <p className="text-xs text-gray-400 mt-2">
+                      {p.progress}% · {p._count.tickets} tickets
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* Stats */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
@@ -317,7 +359,7 @@ export default function ClientDashboardPage() {
                           "px-4 py-2 rounded-full text-sm font-medium border flex items-center space-x-2",
                           statusColors[
                             ticket.status as keyof typeof statusColors
-                          ]
+                          ],
                         )}
                       >
                         <StatusIcon className="w-4 h-4" />

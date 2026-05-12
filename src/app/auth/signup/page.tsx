@@ -57,13 +57,13 @@ export default function SignupPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#0f172a] via-[#1e293b] to-[#334155] relative overflow-hidden">
       {/* Background blur orbs */}
-      <div className="absolute w-[400px] h-[400px] bg-pink-500/30 rounded-full blur-[120px] top-[-100px] left-[-100px]"></div>
+      <div className="absolute w-[400px] h-[400px] bg-sky-500/30 rounded-full blur-[120px] top-[-100px] left-[-100px]"></div>
       <div className="absolute w-[400px] h-[400px] bg-blue-500/30 rounded-full blur-[120px] bottom-[-100px] right-[-100px]"></div>
 
       <div className="flex min-h-screen">
         {/* Left side - Clean branding */}
         <div className="hidden lg:flex lg:w-1/2 relative">
-          <div className="absolute inset-0 bg-gradient-to-br from-pink-500/10 to-purple-600/10"></div>
+          <div className="absolute inset-0 bg-gradient-to-br from-sky-500/10 to-indigo-600/10"></div>
           <div className="relative z-10 flex flex-col justify-center px-16 text-white">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -71,14 +71,6 @@ export default function SignupPage() {
               transition={{ duration: 0.6, ease: "easeOut" }}
               className="mb-16"
             >
-              <motion.h1
-                initial={{ opacity: 0, x: -50 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
-                className="text-5xl font-bold mb-4 tracking-tight"
-              >
-                ClickDown
-              </motion.h1>
               <motion.p
                 initial={{ opacity: 0, x: 50 }}
                 animate={{ opacity: 1, x: 0 }}
@@ -111,9 +103,9 @@ export default function SignupPage() {
                     type: "spring",
                     stiffness: 200,
                   }}
-                  className="w-8 h-8 bg-pink-500/20 rounded-lg flex items-center justify-center flex-shrink-0 mt-1"
+                  className="w-8 h-8 bg-indigo-500/20 rounded-lg flex items-center justify-center flex-shrink-0 mt-1"
                 >
-                  <CheckCircle className="w-5 h-5 text-pink-400" />
+                  <CheckCircle className="w-5 h-5 text-indigo-400" />
                 </motion.div>
                 <motion.div
                   initial={{ opacity: 0, x: 30 }}
@@ -145,9 +137,9 @@ export default function SignupPage() {
                     type: "spring",
                     stiffness: 200,
                   }}
-                  className="w-8 h-8 bg-purple-500/20 rounded-lg flex items-center justify-center flex-shrink-0 mt-1"
+                  className="w-8 h-8 bg-indigo-500/20 rounded-lg flex items-center justify-center flex-shrink-0 mt-1"
                 >
-                  <Users className="w-5 h-5 text-purple-400" />
+                  <Users className="w-5 h-5 text-indigo-400" />
                 </motion.div>
                 <motion.div
                   initial={{ opacity: 0, x: -30 }}
@@ -290,7 +282,6 @@ export default function SignupPage() {
         <div className="flex-1 flex items-center justify-center px-6 sm:px-8 lg:px-12 py-12">
           {/* Mobile logo */}
           <div className="lg:hidden text-center mb-8">
-            <h1 className="text-4xl font-bold text-white mb-2">ClickDown</h1>
             <p className="text-gray-300 text-lg">Create your account</p>
           </div>
 
@@ -313,7 +304,7 @@ export default function SignupPage() {
                 transition={{ duration: 0.7, delay: 0.3, ease: "easeOut" }}
                 className="text-4xl font-bold text-white tracking-tight"
               >
-                Join ClickDown
+                Join
               </motion.h1>
               <motion.p
                 initial={{ opacity: 0, y: 30 }}
@@ -371,7 +362,7 @@ export default function SignupPage() {
                     type="text"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
-                    className="w-full pl-12 pr-4 py-3 rounded-xl bg-white/20 text-white placeholder-gray-300 border border-white/20 focus:border-pink-400 focus:ring-2 focus:ring-pink-500 outline-none transition text-base"
+                    className="w-full pl-12 pr-4 py-3 rounded-xl bg-white/20 text-white placeholder-gray-300 border border-white/20 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-500 outline-none transition text-base"
                     placeholder="Enter your full name"
                     required
                   />
@@ -411,7 +402,7 @@ export default function SignupPage() {
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="w-full pl-12 pr-4 py-3 rounded-xl bg-white/20 text-white placeholder-gray-300 border border-white/20 focus:border-pink-400 focus:ring-2 focus:ring-pink-500 outline-none transition text-base"
+                    className="w-full pl-12 pr-4 py-3 rounded-xl bg-white/20 text-white placeholder-gray-300 border border-white/20 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-500 outline-none transition text-base"
                     placeholder="you@example.com"
                     required
                   />
@@ -456,7 +447,7 @@ export default function SignupPage() {
                     type={showPassword ? "text" : "password"}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="w-full pl-12 pr-12 py-3 rounded-xl bg-white/20 text-white placeholder-gray-300 border border-white/20 focus:border-pink-400 focus:ring-2 focus:ring-pink-500 outline-none transition text-base"
+                    className="w-full pl-12 pr-12 py-3 rounded-xl bg-white/20 text-white placeholder-gray-300 border border-white/20 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-500 outline-none transition text-base"
                     placeholder="••••••••"
                     required
                   />
@@ -516,8 +507,8 @@ export default function SignupPage() {
                     className={cn(
                       "py-3 px-4 rounded-xl border transition-all duration-200 text-sm font-medium",
                       role === "USER"
-                        ? "bg-pink-500 border-pink-500 text-white shadow-lg"
-                        : "bg-white/20 border-white/20 text-gray-300 hover:border-pink-400 hover:bg-white/30"
+                        ? "bg-indigo-500 border-indigo-500 text-white shadow-lg"
+                        : "bg-white/20 border-white/20 text-gray-300 hover:border-indigo-400 hover:bg-white/30",
                     )}
                   >
                     User
@@ -536,8 +527,8 @@ export default function SignupPage() {
                     className={cn(
                       "py-3 px-4 rounded-xl border transition-all duration-200 text-sm font-medium",
                       role === "CLIENT"
-                        ? "bg-pink-500 border-pink-500 text-white shadow-lg"
-                        : "bg-white/20 border-white/20 text-gray-300 hover:border-pink-400 hover:bg-white/30"
+                        ? "bg-indigo-500 border-indigo-500 text-white shadow-lg"
+                        : "bg-white/20 border-white/20 text-gray-300 hover:border-indigo-400 hover:bg-white/30",
                     )}
                   >
                     Client
@@ -551,8 +542,8 @@ export default function SignupPage() {
                 disabled={loading}
                 whileTap={{ scale: 0.97 }}
                 className={cn(
-                  "w-full py-3 px-6 bg-gradient-to-r from-pink-500 to-purple-600 text-white text-base font-medium rounded-xl shadow-lg hover:from-pink-600 hover:to-purple-700 transition flex items-center justify-center gap-2",
-                  loading && "opacity-70 cursor-not-allowed"
+                  "w-full py-3 px-6 bg-gradient-to-r from-sky-500 to-indigo-600 text-white text-base font-medium rounded-xl shadow-lg hover:from-sky-600 hover:to-indigo-700 transition flex items-center justify-center gap-2",
+                  loading && "opacity-70 cursor-not-allowed",
                 )}
               >
                 {loading && <Loader2 className="w-5 h-5 animate-spin" />}
@@ -571,7 +562,7 @@ export default function SignupPage() {
                 Already have an account?{" "}
                 <Link
                   href="/auth/login"
-                  className="text-pink-400 hover:text-pink-300 font-medium"
+                  className="text-indigo-400 hover:text-indigo-300 font-medium"
                 >
                   Sign In
                 </Link>

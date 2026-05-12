@@ -51,6 +51,10 @@ interface Ticket {
     name: string;
     email: string;
   };
+  team?: {
+    id: string;
+    name: string;
+  } | null;
 }
 
 interface KanbanBoardProps {
@@ -82,9 +86,9 @@ const statusConfig = {
   },
   CLIENT_REVIEW: {
     label: "Client Review",
-    color: "bg-purple-500/20 text-purple-400 border-purple-500/30",
+    color: "bg-indigo-500/20 text-indigo-400 border-indigo-500/30",
     icon: Eye,
-    bgColor: "bg-purple-500/10",
+    bgColor: "bg-indigo-500/10",
   },
   COMPLETE: {
     label: "Complete",
@@ -122,25 +126,25 @@ function SortableTicket({
       {...attributes}
       {...listeners}
       className={cn(
-        "bg-gray-800/50 rounded-lg p-4 border border-gray-700/50 hover:border-gray-600/50 transition-all cursor-pointer group touch-none",
-        isDragging && "opacity-50 rotate-2 scale-105 shadow-2xl"
+        "bg-white rounded-lg p-4 border border-gray-200 shadow-sm hover:shadow-md transition-all cursor-pointer group touch-none",
+        isDragging && "opacity-75 scale-105 shadow-2xl",
       )}
       onClick={onClick}
     >
       <div className="flex items-start justify-between mb-3">
-        <h4 className="text-white font-medium text-sm line-clamp-2 flex-1">
+        <h4 className="text-slate-900 font-medium text-sm line-clamp-2 flex-1">
           {ticket.title}
         </h4>
-        <button className="text-gray-400 hover:text-white opacity-0 group-hover:opacity-100 transition-opacity">
+        <button className="text-gray-400 hover:text-gray-700 opacity-0 group-hover:opacity-100 transition-opacity">
           <MoreHorizontal className="w-4 h-4" />
         </button>
       </div>
 
       <div className="flex items-center justify-between">
-        <div className="text-gray-300 text-xs">
+        <div className="text-gray-500 text-xs">
           {ticket.client?.name || "No client"}
         </div>
-        <div className="text-gray-400 text-xs">
+        <div className="text-gray-500 text-xs">
           {new Date(ticket.createdAt).toLocaleDateString()}
         </div>
       </div>
@@ -150,18 +154,18 @@ function SortableTicket({
 
 function DraggedTicket({ ticket }: { ticket: Ticket }) {
   return (
-    <div className="bg-gray-800 rounded-lg p-4 border border-gray-600 shadow-2xl w-80">
+    <div className="bg-white rounded-lg p-4 border border-gray-200 shadow-2xl w-80">
       <div className="flex items-start justify-between mb-3">
-        <h4 className="text-white font-medium text-sm line-clamp-2 flex-1">
+        <h4 className="text-slate-900 font-medium text-sm line-clamp-2 flex-1">
           {ticket.title}
         </h4>
       </div>
 
       <div className="flex items-center justify-between">
-        <div className="text-gray-300 text-xs">
+        <div className="text-gray-500 text-xs">
           {ticket.client?.name || "No client"}
         </div>
-        <div className="text-gray-400 text-xs">
+        <div className="text-gray-500 text-xs">
           {new Date(ticket.createdAt).toLocaleDateString()}
         </div>
       </div>
@@ -196,13 +200,16 @@ export default function KanbanBoard({
 }: KanbanBoardProps) {
   const [activeId, setActiveId] = useState<string | null>(null);
 
-  const groupedTickets = tickets.reduce((acc, ticket) => {
-    if (!acc[ticket.status]) {
-      acc[ticket.status] = [];
-    }
-    acc[ticket.status].push(ticket);
-    return acc;
-  }, {} as Record<string, Ticket[]>);
+  const groupedTickets = tickets.reduce(
+    (acc, ticket) => {
+      if (!acc[ticket.status]) {
+        acc[ticket.status] = [];
+      }
+      acc[ticket.status].push(ticket);
+      return acc;
+    },
+    {} as Record<string, Ticket[]>,
+  );
 
   Object.keys(statusConfig).forEach((status) => {
     if (!groupedTickets[status]) {
@@ -215,7 +222,7 @@ export default function KanbanBoard({
       activationConstraint: {
         distance: 8,
       },
-    })
+    }),
   );
 
   const handleDragStart = (event: DragStartEvent) => {
@@ -264,26 +271,26 @@ export default function KanbanBoard({
 
           return (
             <DroppableColumn key={status} status={status}>
-              <div className="bg-gray-900/50 backdrop-blur-xl rounded-xl border border-gray-800/50 min-h-[600px]">
-                <div className="p-4 border-b border-gray-800/50">
+              <div className="bg-white/95 rounded-xl border border-gray-200 min-h-[600px] shadow-sm">
+                <div className="p-4 border-b border-gray-200">
                   <div className="flex items-center justify-between mb-2">
                     <div className="flex items-center space-x-2">
                       <div className={cn("p-1 rounded-lg", config.bgColor)}>
                         <StatusIcon className="w-4 h-4" />
                       </div>
-                      <h3 className="text-white font-semibold text-sm">
+                      <h3 className="text-slate-900 font-semibold text-sm">
                         {config.label}
                       </h3>
                     </div>
-                    <span className="bg-gray-800 text-gray-300 text-xs px-2 py-1 rounded-full">
+                    <span className="bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded-full">
                       {tickets.length}
                     </span>
                   </div>
 
-                  {userRole === "USER" && (
+                  {(userRole === "USER" || userRole === "SUPER_ADMIN") && (
                     <button
                       onClick={onCreateTicket}
-                      className="w-full mt-2 p-2 text-gray-400 hover:text-white hover:bg-gray-800/50 rounded-lg transition-all text-sm flex items-center justify-center space-x-1"
+                      className="w-full mt-2 p-2 text-indigo-600 hover:text-indigo-900 hover:bg-indigo-50 rounded-lg transition-all text-sm flex items-center justify-center space-x-1"
                     >
                       <Plus className="w-3 h-3" />
                       <span>Add ticket</span>
@@ -306,9 +313,9 @@ export default function KanbanBoard({
                   </SortableContext>
 
                   {tickets.length === 0 && (
-                    <div className="text-center py-8 text-gray-400 text-sm">
-                      <div className="w-8 h-8 bg-gray-800/50 rounded-lg flex items-center justify-center mx-auto mb-2">
-                        <Tag className="w-4 h-4" />
+                    <div className="text-center py-8 text-gray-500 text-sm">
+                      <div className="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center mx-auto mb-2">
+                        <Tag className="w-4 h-4 text-gray-500" />
                       </div>
                       No tickets
                     </div>

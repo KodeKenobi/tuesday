@@ -1,8 +1,4 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+// Enterprise internal PM schema — SQLite dev; portable to Postgres later
 
 generator client {
   provider = "prisma-client-js"
@@ -10,7 +6,7 @@ generator client {
 
 datasource db {
   provider = "sqlite"
-  url      = env("DATABASE_URL")
+  url      = "file:./dev.db"
 }
 
 model User {
@@ -19,13 +15,29 @@ model User {
   password  String
   name      String
   role      Role     @default(USER)
+  teamId    String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  // Relations
-  createdTickets Ticket[] @relation("TicketCreator")
-  assignedTickets Ticket[] @relation("TicketAssignee")
-  passwordResets PasswordReset[]
+  team             Team?            @relation(fields: [teamId], references: [id])
+  teamMemberships  TeamMembership[]
+  createdTickets   Ticket[]         @relation("TicketCreator")
+  assignedTickets  Ticket[]         @relation("TicketAssignee")
+  passwordResets   PasswordReset[]
+  auditLogs        AuditLog[]
+  savedViews       SavedView[]
+}
+
+model TeamMembership {
+  id        String   @id @default(cuid())
+  userId    String
+  teamId    String
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  team Team @relation(fields: [teamId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, teamId])
 }
 
 model Client {
@@ -36,8 +48,20 @@ model Client {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  // Relations
-  tickets Ticket[]
+  tickets  Ticket[]
+  projects Project[]
+}
+
+model Team {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  users         User[]
+  memberships   TeamMembership[]
+  tickets       Ticket[]
+  projects      Project[]
 }
 
 model PasswordReset {
@@ -48,18 +72,61 @@ model PasswordReset {
   used      Boolean  @default(false)
   createdAt DateTime @default(now())
 
-  // Relations
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Portfolio {
+  id          String    @id @default(cuid())
+  name        String
+  description String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  projects Project[]
+}
+
+model Project {
+  id          String        @id @default(cuid())
+  name        String
+  description String?
+  status      ProjectStatus @default(PLANNING)
+  health      ProjectHealth @default(GREEN)
+  progress    Int           @default(0)
+  startDate   DateTime?
+  endDate     DateTime?
+  portfolioId String?
+  teamId      String
+  clientId    String?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  portfolio  Portfolio?  @relation(fields: [portfolioId], references: [id])
+  team       Team        @relation(fields: [teamId], references: [id])
+  client     Client?     @relation(fields: [clientId], references: [id])
+  milestones Milestone[]
+  tickets    Ticket[]
+}
+
+model Milestone {
+  id          String    @id @default(cuid())
+  projectId   String
+  title       String
+  dueDate     DateTime?
+  completedAt DateTime?
+  sortOrder   Int       @default(0)
+  createdAt   DateTime  @default(now())
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
 }
 
 model Ticket {
   id          String       @id @default(cuid())
   title       String
+  description String?
   status      TicketStatus @default(BACKLOG)
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @updatedAt
 
-  // Relations
   creatorId String
   creator   User   @relation("TicketCreator", fields: [creatorId], references: [id])
 
@@ -68,11 +135,62 @@ model Ticket {
 
   clientId String?
   client   Client? @relation(fields: [clientId], references: [id])
+
+  teamId String?
+  team   Team? @relation(fields: [teamId], references: [id])
+
+  projectId String?
+  project   Project? @relation(fields: [projectId], references: [id])
+}
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  actorId    String
+  action     String
+  entityType String
+  entityId   String
+  metadata   String?
+  createdAt  DateTime @default(now())
+
+  actor User @relation(fields: [actorId], references: [id], onDelete: Cascade)
+}
+
+model SavedView {
+  id        String   @id @default(cuid())
+  userId    String
+  name      String
+  teamId    String?
+  filters   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model OrganizationSettings {
+  id                String   @id @default("default")
+  ssoEnabled        Boolean  @default(false)
+  ssoProvider       String?
+  allowedIpRaw      String?
+  dataRetentionDays Int?
+  updatedAt         DateTime @updatedAt
+}
+
+model AutomationRule {
+  id        String   @id @default(cuid())
+  name      String
+  teamId    String?
+  trigger   String
+  action    String
+  enabled   Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 enum Role {
   USER
   CLIENT
+  SUPER_ADMIN
 }
 
 enum TicketStatus {
@@ -81,4 +199,18 @@ enum TicketStatus {
   REVISIONS
   CLIENT_REVIEW
   COMPLETE
+}
+
+enum ProjectStatus {
+  PLANNING
+  ACTIVE
+  ON_HOLD
+  COMPLETE
+  ARCHIVED
+}
+
+enum ProjectHealth {
+  GREEN
+  AMBER
+  RED
 }

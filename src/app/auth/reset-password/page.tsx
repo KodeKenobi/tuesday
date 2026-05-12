@@ -27,7 +27,6 @@ function ResetPasswordContent() {
   const [tokenValid, setTokenValid] = useState(false);
   const [validating, setValidating] = useState(true);
 
-
   const searchParams = useSearchParams();
 
   useEffect(() => {
@@ -76,7 +75,7 @@ function ResetPasswordContent() {
       setSuccess(true);
     } catch (error) {
       setError(
-        error instanceof Error ? error.message : "Failed to reset password"
+        error instanceof Error ? error.message : "Failed to reset password",
       );
     } finally {
       setLoading(false);
@@ -85,7 +84,7 @@ function ResetPasswordContent() {
 
   if (validating) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-gray-900 flex items-center justify-center p-4">
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-blue-900 to-gray-900 flex items-center justify-center p-4">
         <div className="w-full max-w-md">
           <div className="bg-white/10 backdrop-blur-xl rounded-2xl border border-white/20 p-8 shadow-2xl text-center">
             <Loader2 className="w-8 h-8 animate-spin text-white mx-auto mb-4" />
@@ -98,7 +97,7 @@ function ResetPasswordContent() {
 
   if (!tokenValid) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-gray-900 flex items-center justify-center p-4">
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-blue-900 to-gray-900 flex items-center justify-center p-4">
         <div className="w-full max-w-md">
           <div className="bg-white/10 backdrop-blur-xl rounded-2xl border border-white/20 p-8 shadow-2xl text-center">
             <AlertCircle className="w-12 h-12 text-red-400 mx-auto mb-4" />
@@ -108,7 +107,7 @@ function ResetPasswordContent() {
             <p className="text-gray-300 text-sm mb-6">{error}</p>
             <Link
               href="/auth/forgot-password"
-              className="inline-flex items-center justify-center w-full py-3 px-6 bg-gradient-to-r from-pink-500 to-purple-600 text-white text-base font-medium rounded-xl shadow-lg hover:from-pink-600 hover:to-purple-700 transition"
+              className="inline-flex items-center justify-center w-full py-3 px-6 bg-gradient-to-r from-sky-500 to-indigo-600 text-white text-base font-medium rounded-xl shadow-lg hover:from-sky-600 hover:to-indigo-700 transition"
             >
               Request New Reset Link
             </Link>
@@ -140,8 +139,8 @@ function ResetPasswordContent() {
                 Password Reset Successfully
               </h1>
               <p className="text-gray-300 text-sm mb-6">
-                Your password has been updated. You can now sign in with your new
-                password.
+                Your password has been updated. You can now sign in with your
+                new password.
               </p>
               <Link
                 href="/auth/login"
@@ -221,7 +220,7 @@ function ResetPasswordContent() {
                       type={showPassword ? "text" : "password"}
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
-                      className="w-full pl-12 pr-12 py-3 rounded-xl bg-white/20 text-white placeholder-gray-300 border border-white/20 focus:border-pink-400 focus:ring-2 focus:ring-pink-500 outline-none transition text-base"
+                      className="w-full pl-12 pr-12 py-3 rounded-xl bg-white/20 text-white placeholder-gray-300 border border-white/20 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-500 outline-none transition text-base"
                       placeholder="••••••••"
                       required
                     />
@@ -275,7 +274,7 @@ function ResetPasswordContent() {
                       type={showConfirmPassword ? "text" : "password"}
                       value={confirmPassword}
                       onChange={(e) => setConfirmPassword(e.target.value)}
-                      className="w-full pl-12 pr-12 py-3 rounded-xl bg-white/20 text-white placeholder-gray-300 border border-white/20 focus:border-pink-400 focus:ring-2 focus:ring-pink-500 outline-none transition text-base"
+                      className="w-full pl-12 pr-12 py-3 rounded-xl bg-white/20 text-white placeholder-gray-300 border border-white/20 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-500 outline-none transition text-base"
                       placeholder="••••••••"
                       required
                     />
@@ -284,7 +283,9 @@ function ResetPasswordContent() {
                       animate={{ opacity: 1 }}
                       transition={{ delay: 0.6, duration: 0.3 }}
                       type="button"
-                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                      onClick={() =>
+                        setShowConfirmPassword(!showConfirmPassword)
+                      }
                       className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white"
                     >
                       {showConfirmPassword ? (
@@ -302,8 +303,8 @@ function ResetPasswordContent() {
                   disabled={loading}
                   whileTap={{ scale: 0.97 }}
                   className={cn(
-                    "w-full py-3 px-6 bg-gradient-to-r from-pink-500 to-purple-600 text-white text-base font-medium rounded-xl shadow-lg hover:from-pink-600 hover:to-purple-700 transition flex items-center justify-center gap-2",
-                    loading && "opacity-70 cursor-not-allowed"
+                    "w-full py-3 px-6 bg-gradient-to-r from-sky-500 to-indigo-600 text-white text-base font-medium rounded-xl shadow-lg hover:from-sky-600 hover:to-indigo-700 transition flex items-center justify-center gap-2",
+                    loading && "opacity-70 cursor-not-allowed",
                   )}
                 >
                   {loading && <Loader2 className="w-5 h-5 animate-spin" />}
@@ -338,17 +339,19 @@ function ResetPasswordContent() {
 
 export default function ResetPasswordPage() {
   return (
-    <Suspense fallback={
-      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-gray-900 flex items-center justify-center p-4">
-        <div className="w-full max-w-md">
-          <div className="bg-white/10 backdrop-blur-xl rounded-2xl border border-white/20 p-8 shadow-2xl text-center">
-            <Loader2 className="w-8 h-8 animate-spin text-white mx-auto mb-4" />
-            <p className="text-gray-300">Loading...</p>
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-gray-900 flex items-center justify-center p-4">
+          <div className="w-full max-w-md">
+            <div className="bg-white/10 backdrop-blur-xl rounded-2xl border border-white/20 p-8 shadow-2xl text-center">
+              <Loader2 className="w-8 h-8 animate-spin text-white mx-auto mb-4" />
+              <p className="text-gray-300">Loading...</p>
+            </div>
           </div>
         </div>
-      </div>
-    }>
+      }
+    >
       <ResetPasswordContent />
     </Suspense>
   );
-} 
+}

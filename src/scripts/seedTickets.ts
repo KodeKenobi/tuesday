@@ -28,17 +28,27 @@ async function seedDatabase() {
       })
     );
 
-    // Create a test user account for easy login
+    const firstTeam = await prisma.team.findFirst({
+      orderBy: { name: "asc" },
+    });
+
+    // Create a test user account for easy login (needs team for internal app)
     console.log("🔑 Creating test user account...");
     const testUserPassword = await hashPassword("test123");
-    await prisma.user.create({
+    const testUser = await prisma.user.create({
       data: {
         email: "test@example.com",
         password: testUserPassword,
         name: "Test User",
         role: "USER",
+        ...(firstTeam ? { teamId: firstTeam.id } : {}),
       },
     });
+    if (firstTeam) {
+      await prisma.teamMembership.create({
+        data: { userId: testUser.id, teamId: firstTeam.id },
+      });
+    }
 
     // Create clients
     console.log("🏢 Creating clients...");

@@ -1,5 +1,192 @@
 import { User, Client } from "@prisma/client";
 
+// Types for expanded features
+export interface Team {
+  id: string;
+  name: string;
+  description: string;
+  color: string;
+  members: string[]; // user IDs
+  createdAt: Date;
+}
+
+export interface Channel {
+  id: string;
+  name: string;
+  description: string;
+  teamId: string;
+  type: "public" | "private";
+  members: string[]; // user IDs
+  createdAt: Date;
+}
+
+export interface Message {
+  id: string;
+  content: string;
+  authorId: string;
+  channelId: string;
+  createdAt: Date;
+  attachments?: File[];
+}
+
+export interface File {
+  id: string;
+  name: string;
+  url: string;
+  size: number;
+  type: string;
+  uploadedBy: string;
+  uploadedAt: Date;
+  ticketId?: string;
+  channelId?: string;
+}
+
+// Mock Teams
+export const mockTeams: Team[] = [
+  {
+    id: "team-sales",
+    name: "Sales",
+    description: "Sales and business development team",
+    color: "#3b82f6",
+    members: ["user-1", "user-2"],
+    createdAt: new Date("2024-01-01"),
+  },
+  {
+    id: "team-marketing",
+    name: "Marketing",
+    description: "Marketing and brand management",
+    color: "#8b5cf6",
+    members: ["user-3", "user-4"],
+    createdAt: new Date("2024-01-01"),
+  },
+  {
+    id: "team-development",
+    name: "Development",
+    description: "Software development and engineering",
+    color: "#22c55e",
+    members: ["user-5", "user-6", "user-7"],
+    createdAt: new Date("2024-01-01"),
+  },
+  {
+    id: "team-business-analysis",
+    name: "Business Analysis",
+    description: "Requirements gathering and analysis",
+    color: "#f59e0b",
+    members: ["user-8", "user-9"],
+    createdAt: new Date("2024-01-01"),
+  },
+];
+
+// Mock Channels
+export const mockChannels: Channel[] = [
+  {
+    id: "channel-sales-general",
+    name: "general",
+    description: "General sales discussions",
+    teamId: "team-sales",
+    type: "public",
+    members: ["user-1", "user-2"],
+    createdAt: new Date("2024-01-01"),
+  },
+  {
+    id: "channel-sales-leads",
+    name: "leads",
+    description: "New leads and opportunities",
+    teamId: "team-sales",
+    type: "public",
+    members: ["user-1", "user-2"],
+    createdAt: new Date("2024-01-01"),
+  },
+  {
+    id: "channel-marketing-general",
+    name: "general",
+    description: "Marketing team discussions",
+    teamId: "team-marketing",
+    type: "public",
+    members: ["user-3", "user-4"],
+    createdAt: new Date("2024-01-01"),
+  },
+  {
+    id: "channel-dev-general",
+    name: "general",
+    description: "Development team chat",
+    teamId: "team-development",
+    type: "public",
+    members: ["user-5", "user-6", "user-7"],
+    createdAt: new Date("2024-01-01"),
+  },
+];
+
+// Mock Messages
+export const mockMessages: Message[] = [
+  {
+    id: "msg-1",
+    content:
+      "New client lead from TechCorp - they need a full website redesign",
+    authorId: "user-1",
+    channelId: "channel-sales-leads",
+    createdAt: new Date("2024-01-15T10:00:00"),
+  },
+  {
+    id: "msg-2",
+    content:
+      "Great! I've scheduled a discovery call for tomorrow. @sarah can you prepare the design brief?",
+    authorId: "user-2",
+    channelId: "channel-sales-leads",
+    createdAt: new Date("2024-01-15T10:15:00"),
+  },
+  {
+    id: "msg-3",
+    content:
+      "On it! I'll have the brief ready by EOD. Should we include the new branding guidelines?",
+    authorId: "user-3",
+    channelId: "channel-marketing-general",
+    createdAt: new Date("2024-01-15T10:30:00"),
+  },
+  {
+    id: "msg-4",
+    content:
+      "Yes, definitely. The client specifically mentioned wanting to refresh their brand identity.",
+    authorId: "user-1",
+    channelId: "channel-sales-leads",
+    createdAt: new Date("2024-01-15T10:45:00"),
+  },
+];
+
+// Mock Files
+export const mockFiles: File[] = [
+  {
+    id: "file-1",
+    name: "TechCorp_Brand_Guidelines.pdf",
+    url: "/files/techcorp-brand.pdf",
+    size: 2048576, // 2MB
+    type: "application/pdf",
+    uploadedBy: "user-3",
+    uploadedAt: new Date("2024-01-15T09:00:00"),
+    channelId: "channel-marketing-general",
+  },
+  {
+    id: "file-2",
+    name: "Homepage_Wireframes.fig",
+    url: "/files/homepage-wireframes.fig",
+    size: 512000, // 512KB
+    type: "application/figma",
+    uploadedBy: "user-3",
+    uploadedAt: new Date("2024-01-15T11:00:00"),
+    ticketId: "ticket-1",
+  },
+  {
+    id: "file-3",
+    name: "Project_Requirements.docx",
+    url: "/files/project-requirements.docx",
+    size: 1024000, // 1MB
+    type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    uploadedBy: "user-8",
+    uploadedAt: new Date("2024-01-14T14:00:00"),
+    channelId: "channel-dev-general",
+  },
+];
+
 // Mock Users
 export const mockUsers: Omit<User, "id" | "createdAt" | "updatedAt">[] = [
   {
@@ -7,30 +194,35 @@ export const mockUsers: Omit<User, "id" | "createdAt" | "updatedAt">[] = [
     password: "hashed_password",
     name: "Sarah Chen",
     role: "USER",
+    teamId: null,
   },
   {
     email: "mike.developer@company.com",
     password: "hashed_password",
     name: "Mike Rodriguez",
     role: "USER",
+    teamId: null,
   },
   {
     email: "alex.project@company.com",
     password: "hashed_password",
     name: "Alex Thompson",
     role: "USER",
+    teamId: null,
   },
   {
     email: "jessica.ux@company.com",
     password: "hashed_password",
     name: "Jessica Park",
     role: "USER",
+    teamId: null,
   },
   {
     email: "david.frontend@company.com",
     password: "hashed_password",
     name: "David Kim",
     role: "USER",
+    teamId: null,
   },
 ];
 
@@ -383,7 +575,7 @@ export const mockTickets = [
 // Helper function to generate random dates within a range
 export function getRandomDate(start: Date, end: Date): Date {
   return new Date(
-    start.getTime() + Math.random() * (end.getTime() - start.getTime())
+    start.getTime() + Math.random() * (end.getTime() - start.getTime()),
   );
 }
 

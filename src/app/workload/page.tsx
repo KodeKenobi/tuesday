@@ -42,31 +42,36 @@ interface Ticket {
 const statusConfig = {
   BACKLOG: {
     label: "Backlog",
-    color: "bg-gray-500/20 text-gray-400 border-gray-500/30",
+    color:
+      "bg-gray-100 text-gray-800 border border-gray-300 dark:bg-gray-500/20 dark:text-gray-300 dark:border-gray-500/30",
     icon: ClockIcon,
     bgColor: "bg-gray-500/10",
   },
   IN_PROGRESS: {
     label: "In Progress",
-    color: "bg-blue-500/20 text-blue-400 border-blue-500/30",
+    color:
+      "bg-blue-100 text-blue-800 border border-blue-300 dark:bg-blue-500/20 dark:text-blue-400 dark:border-blue-500/30",
     icon: Zap,
     bgColor: "bg-blue-500/10",
   },
   REVISIONS: {
     label: "Revisions",
-    color: "bg-yellow-500/20 text-yellow-400 border-yellow-500/30",
+    color:
+      "bg-yellow-100 text-yellow-900 border border-yellow-400 dark:bg-yellow-500/20 dark:text-yellow-400 dark:border-yellow-500/30",
     icon: AlertCircle,
     bgColor: "bg-yellow-500/10",
   },
   CLIENT_REVIEW: {
     label: "Client Review",
-    color: "bg-purple-500/20 text-purple-400 border-purple-500/30",
+    color:
+      "bg-indigo-100 text-indigo-800 border border-indigo-300 dark:bg-indigo-500/20 dark:text-indigo-400 dark:border-indigo-500/30",
     icon: Eye,
-    bgColor: "bg-purple-500/10",
+    bgColor: "bg-indigo-500/10",
   },
   COMPLETE: {
     label: "Complete",
-    color: "bg-green-500/20 text-green-400 border-green-500/30",
+    color:
+      "bg-green-100 text-green-800 border border-green-300 dark:bg-green-500/20 dark:text-green-400 dark:border-green-500/30",
     icon: CheckCircle2,
     bgColor: "bg-green-500/10",
   },
@@ -89,6 +94,7 @@ export default function WorkloadPage() {
         params.append("status", statusFilter);
       }
 
+      params.set("myWorkload", "1");
       const response = await fetch(`/api/tickets?${params}`);
 
       if (!response.ok) {
@@ -96,13 +102,7 @@ export default function WorkloadPage() {
       }
 
       const data = await response.json();
-
-      const filteredTickets = data.filter(
-        (ticket: Ticket) =>
-          ticket.assignee?.id === user?.id || ticket.creator.id === user?.id
-      );
-
-      setTickets(filteredTickets);
+      setTickets(data);
     } catch {
       setError("Failed to fetch tickets");
     } finally {
@@ -175,23 +175,25 @@ export default function WorkloadPage() {
       <div className="max-w-7xl mx-auto space-y-6">
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-bold text-white mb-2">My Workload</h1>
-            <p className="text-gray-400">
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+              My Workload
+            </h1>
+            <p className="text-gray-600 dark:text-gray-400">
               Tickets assigned to you or created by you
             </p>
           </div>
         </div>
 
-        <div className="bg-gray-900/50 backdrop-blur-xl rounded-xl border border-gray-800/50 p-6">
+        <div className="bg-white/80 dark:bg-gray-900/50 backdrop-blur-xl rounded-xl border border-gray-200/80 dark:border-gray-800/50 p-6">
           <div className="flex flex-col lg:flex-row lg:items-center gap-4">
             <div className="flex-1 relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-gray-400 w-4 h-4" />
               <input
                 type="text"
                 placeholder="Search tickets..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 bg-gray-800/50 border border-gray-700/50 rounded-lg text-white placeholder-gray-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition-all"
+                className="w-full pl-10 pr-4 py-2 bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700/50 rounded-lg text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition-all"
               />
             </div>
 
@@ -199,7 +201,7 @@ export default function WorkloadPage() {
               <select
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
-                className="bg-gray-800/50 border border-gray-700/50 rounded-lg px-3 py-2 text-white focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition-all"
+                className="bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700/50 rounded-lg px-3 py-2 text-gray-900 dark:text-white focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition-all"
               >
                 <option value="">All Statuses</option>
                 {Object.entries(statusConfig).map(([key, config]) => (
@@ -223,33 +225,33 @@ export default function WorkloadPage() {
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-500"></div>
           </div>
         ) : filteredTickets.length === 0 ? (
-          <div className="text-center py-12 bg-gray-900/50 backdrop-blur-xl rounded-xl border border-gray-800/50">
-            <p className="text-gray-400 text-lg mb-2">
+          <div className="text-center py-12 bg-white/80 dark:bg-gray-900/50 backdrop-blur-xl rounded-xl border border-gray-200/80 dark:border-gray-800/50">
+            <p className="text-gray-600 dark:text-gray-400 text-lg mb-2">
               No tickets in your workload
             </p>
-            <p className="text-gray-500 text-sm mb-4">
+            <p className="text-gray-500 dark:text-gray-500 text-sm mb-4">
               Tickets assigned to you or created by you will appear here
             </p>
           </div>
         ) : (
-          <div className="bg-gray-900/50 backdrop-blur-xl rounded-xl border border-gray-800/50 overflow-hidden">
+          <div className="bg-white/90 dark:bg-gray-900/50 backdrop-blur-xl rounded-xl border border-gray-200/80 dark:border-gray-800/50 overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead>
-                  <tr className="border-b border-gray-800/50">
-                    <th className="text-left p-6 text-gray-400 font-medium">
+                  <tr className="border-b border-gray-200 dark:border-gray-800/50">
+                    <th className="text-left p-6 text-gray-600 dark:text-gray-400 font-medium">
                       Title
                     </th>
-                    <th className="text-left p-6 text-gray-400 font-medium">
+                    <th className="text-left p-6 text-gray-600 dark:text-gray-400 font-medium">
                       Status
                     </th>
-                    <th className="text-left p-6 text-gray-400 font-medium">
+                    <th className="text-left p-6 text-gray-600 dark:text-gray-400 font-medium">
                       Client
                     </th>
-                    <th className="text-left p-6 text-gray-400 font-medium">
+                    <th className="text-left p-6 text-gray-600 dark:text-gray-400 font-medium">
                       Role
                     </th>
-                    <th className="text-left p-6 text-gray-400 font-medium">
+                    <th className="text-left p-6 text-gray-600 dark:text-gray-400 font-medium">
                       Actions
                     </th>
                   </tr>
@@ -263,14 +265,14 @@ export default function WorkloadPage() {
                     return (
                       <tr
                         key={ticket.id}
-                        className="border-b border-gray-800/30 hover:bg-gray-800/20 transition-colors"
+                        className="border-b border-gray-100 dark:border-gray-800/30 hover:bg-gray-50 dark:hover:bg-gray-800/20 transition-colors"
                       >
                         <td className="p-6">
                           <div>
-                            <p className="text-white font-medium">
+                            <p className="text-gray-900 dark:text-white font-medium">
                               {ticket.title}
                             </p>
-                            <p className="text-gray-400 text-sm">
+                            <p className="text-gray-600 dark:text-gray-400 text-sm">
                               Created by {ticket.creator.name}
                             </p>
                           </div>
@@ -279,7 +281,7 @@ export default function WorkloadPage() {
                           <span
                             className={cn(
                               "inline-flex items-center space-x-1 px-2 py-1 rounded-full text-xs font-medium border",
-                              status.color
+                              status.color,
                             )}
                           >
                             <StatusIcon className="w-3 h-3" />
@@ -287,7 +289,7 @@ export default function WorkloadPage() {
                           </span>
                         </td>
                         <td className="p-6">
-                          <p className="text-gray-300">
+                          <p className="text-gray-700 dark:text-gray-300">
                             {ticket.client?.name || "No client"}
                           </p>
                         </td>
@@ -296,8 +298,8 @@ export default function WorkloadPage() {
                             className={cn(
                               "inline-flex items-center px-2 py-1 rounded-full text-xs font-medium",
                               ticket.assignee?.id === user.id
-                                ? "bg-blue-500/20 text-blue-400"
-                                : "bg-purple-500/20 text-purple-400"
+                                ? "bg-blue-100 text-blue-800 dark:bg-blue-500/20 dark:text-blue-400"
+                                : "bg-gray-100 text-gray-800 dark:bg-gray-500/20 dark:text-gray-400",
                             )}
                           >
                             {ticket.assignee?.id === user.id
@@ -308,30 +310,30 @@ export default function WorkloadPage() {
                         <td className="p-6">
                           <div className="flex items-center space-x-2">
                             <button
-                              className="text-gray-400 hover:text-white p-1 relative group"
+                              className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white p-1 relative group"
                               title="View ticket details"
                             >
                               <Eye className="w-4 h-4" />
-                              <span className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10">
+                              <span className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-900 text-white dark:bg-gray-100 dark:text-gray-900 text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10">
                                 View details
                               </span>
                             </button>
                             <button
-                              className="text-gray-400 hover:text-white p-1 relative group"
+                              className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white p-1 relative group"
                               title="Edit ticket"
                             >
                               <Edit className="w-4 h-4" />
-                              <span className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10">
+                              <span className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-900 text-white dark:bg-gray-100 dark:text-gray-900 text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10">
                                 Edit ticket
                               </span>
                             </button>
                             <button
                               onClick={() => handleDeleteTicket(ticket.id)}
-                              className="text-red-400 hover:text-red-300 p-1 relative group"
+                              className="text-red-600 dark:text-red-400 hover:text-red-500 dark:hover:text-red-300 p-1 relative group"
                               title="Delete ticket"
                             >
                               <Trash2 className="w-4 h-4" />
-                              <span className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10">
+                              <span className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-900 text-white dark:bg-gray-100 dark:text-gray-900 text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10">
                                 Delete ticket
                               </span>
                             </button>
@@ -340,14 +342,14 @@ export default function WorkloadPage() {
                               onChange={(e) =>
                                 handleStatusChange(ticket.id, e.target.value)
                               }
-                              className="bg-gray-800/50 border border-gray-700/50 rounded-lg px-2 py-1 text-white text-xs focus:border-indigo-500 focus:outline-none"
+                              className="bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700/50 rounded-lg px-2 py-1 text-gray-900 dark:text-white text-xs focus:border-indigo-500 focus:outline-none"
                             >
                               {Object.entries(statusConfig).map(
                                 ([key, config]) => (
                                   <option key={key} value={key}>
                                     {config.label}
                                   </option>
-                                )
+                                ),
                               )}
                             </select>
                           </div>

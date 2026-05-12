@@ -4,45 +4,128 @@ const bcrypt = require("bcryptjs");
 const prisma = new PrismaClient();
 
 async function main() {
-  console.log("🌱 Starting database seeding...");
+  console.log("🌱 Seeding enterprise data…");
 
-  // Create users
+  await prisma.auditLog.deleteMany();
+  await prisma.automationRule.deleteMany();
+  await prisma.savedView.deleteMany();
+  await prisma.ticket.deleteMany();
+  await prisma.milestone.deleteMany();
+  await prisma.project.deleteMany();
+  await prisma.portfolio.deleteMany();
+  await prisma.teamMembership.deleteMany();
+
+  await prisma.organizationSettings.upsert({
+    where: { id: "default" },
+    create: { id: "default", ssoEnabled: false },
+    update: {},
+  });
+
+  const devTeam = await prisma.team.upsert({
+    where: { name: "Development" },
+    update: {},
+    create: { name: "Development" },
+  });
+
+  const salesTeam = await prisma.team.upsert({
+    where: { name: "Sales" },
+    update: {},
+    create: { name: "Sales" },
+  });
+
+  const marketingTeam = await prisma.team.upsert({
+    where: { name: "Marketing" },
+    update: {},
+    create: { name: "Marketing" },
+  });
+
   const hashedPassword = await bcrypt.hash("password123", 10);
+
+  const superAdmin = await prisma.user.upsert({
+    where: { email: "superadmin@example.com" },
+    update: { role: "SUPER_ADMIN" },
+    create: {
+      email: "superadmin@example.com",
+      password: hashedPassword,
+      name: "Department Head",
+      role: "SUPER_ADMIN",
+    },
+  });
 
   const user1 = await prisma.user.upsert({
     where: { email: "admin@example.com" },
-    update: {},
+    update: { teamId: devTeam.id },
     create: {
       email: "admin@example.com",
       password: hashedPassword,
       name: "Admin User",
       role: "USER",
+      teamId: devTeam.id,
     },
   });
 
   const user2 = await prisma.user.upsert({
     where: { email: "john@example.com" },
-    update: {},
+    update: { teamId: devTeam.id },
     create: {
       email: "john@example.com",
       password: hashedPassword,
       name: "John Smith",
       role: "USER",
+      teamId: devTeam.id,
     },
   });
 
   const user3 = await prisma.user.upsert({
     where: { email: "sarah@example.com" },
-    update: {},
+    update: { teamId: salesTeam.id },
     create: {
       email: "sarah@example.com",
       password: hashedPassword,
       name: "Sarah Johnson",
       role: "USER",
+      teamId: salesTeam.id,
     },
   });
 
-  // Create clients
+  const testUser = await prisma.user.upsert({
+    where: { email: "test@example.com" },
+    update: {
+      teamId: devTeam.id,
+      role: "USER",
+    },
+    create: {
+      email: "test@example.com",
+      password: hashedPassword,
+      name: "Test User",
+      role: "USER",
+      teamId: devTeam.id,
+    },
+  });
+
+  await prisma.user.upsert({
+    where: { email: "acme@example.com" },
+    update: { role: "CLIENT" },
+    create: {
+      email: "acme@example.com",
+      password: hashedPassword,
+      name: "Acme Portal User",
+      role: "CLIENT",
+    },
+  });
+
+  await prisma.teamMembership.createMany({
+    data: [
+      { userId: user1.id, teamId: devTeam.id },
+      { userId: user2.id, teamId: devTeam.id },
+      { userId: user3.id, teamId: salesTeam.id },
+      { userId: testUser.id, teamId: devTeam.id },
+      { userId: superAdmin.id, teamId: devTeam.id },
+      { userId: superAdmin.id, teamId: salesTeam.id },
+      { userId: superAdmin.id, teamId: marketingTeam.id },
+    ],
+  });
+
   const client1 = await prisma.client.upsert({
     where: { email: "acme@example.com" },
     update: {},
@@ -93,211 +176,207 @@ async function main() {
     },
   });
 
-  // Create tickets with new fields
-  const tickets = [
+  const portfolio = await prisma.portfolio.create({
+    data: {
+      name: "2026 Company Delivery",
+      description: "Portfolio for heads-of-department overview",
+    },
+  });
+
+  const projDev = await prisma.project.create({
+    data: {
+      name: "Acme Digital Platform",
+      description: "End-to-end delivery for Acme",
+      teamId: devTeam.id,
+      portfolioId: portfolio.id,
+      clientId: client1.id,
+      status: "ACTIVE",
+      health: "GREEN",
+      progress: 42,
+    },
+  });
+
+  const projSales = await prisma.project.create({
+    data: {
+      name: "Enterprise Pipeline",
+      teamId: salesTeam.id,
+      portfolioId: portfolio.id,
+      clientId: client5.id,
+      status: "ACTIVE",
+      health: "AMBER",
+      progress: 60,
+    },
+  });
+
+  await prisma.milestone.createMany({
+    data: [
+      {
+        projectId: projDev.id,
+        title: "Design sign-off",
+        sortOrder: 0,
+        completedAt: new Date(),
+      },
+      {
+        projectId: projDev.id,
+        title: "Production launch",
+        sortOrder: 1,
+        dueDate: new Date(Date.now() + 1000 * 60 * 60 * 24 * 30),
+      },
+      {
+        projectId: projSales.id,
+        title: "Q2 revenue target",
+        sortOrder: 0,
+        dueDate: new Date(Date.now() + 1000 * 60 * 60 * 24 * 14),
+      },
+    ],
+  });
+
+  await prisma.automationRule.create({
+    data: {
+      name: "Auto-notify on client review",
+      teamId: devTeam.id,
+      trigger: JSON.stringify({ type: "ticket.status", to: "CLIENT_REVIEW" }),
+      action: JSON.stringify({ type: "notify", channel: "email" }),
+      enabled: true,
+    },
+  });
+
+  const ticketRows = [
     {
       title: "Website Redesign - Homepage",
-      description:
-        "Complete redesign of the homepage with modern UI/UX principles. Focus on improving conversion rates and user engagement.",
-      priority: "HIGH",
       status: "IN_PROGRESS",
-      estimatedHours: 16.0,
-      tags: JSON.stringify(["design", "frontend", "homepage"]),
       creatorId: user1.id,
       assigneeId: user2.id,
       clientId: client1.id,
+      teamId: devTeam.id,
+      projectId: projDev.id,
     },
     {
       title: "Mobile App Development",
-      description:
-        "Develop a cross-platform mobile application for iOS and Android using React Native. Include user authentication and real-time features.",
-      priority: "URGENT",
       status: "BACKLOG",
-      estimatedHours: 80.0,
-      tags: JSON.stringify(["mobile", "react-native", "development"]),
       creatorId: user1.id,
       assigneeId: user3.id,
       clientId: client2.id,
+      teamId: devTeam.id,
+      projectId: projDev.id,
     },
     {
       title: "Database Optimization",
-      description:
-        "Optimize existing database queries and implement indexing strategies to improve application performance.",
-      priority: "MEDIUM",
       status: "CLIENT_REVIEW",
-      estimatedHours: 12.0,
-      tags: JSON.stringify(["database", "optimization", "performance"]),
       creatorId: user2.id,
       assigneeId: user1.id,
       clientId: client3.id,
+      teamId: devTeam.id,
     },
     {
       title: "API Integration",
-      description:
-        "Integrate third-party payment processing API and implement secure transaction handling.",
-      priority: "HIGH",
       status: "REVISIONS",
-      estimatedHours: 24.0,
-      tags: JSON.stringify(["api", "payment", "integration"]),
-      creatorId: user3.id,
+      creatorId: user1.id,
       assigneeId: user2.id,
       clientId: client4.id,
+      teamId: devTeam.id,
+    },
+    {
+      title: "Sales Presentation",
+      status: "COMPLETE",
+      creatorId: user3.id,
+      assigneeId: user3.id,
+      clientId: client5.id,
+      teamId: salesTeam.id,
+      projectId: projSales.id,
+    },
+    {
+      title: "Client Onboarding",
+      status: "IN_PROGRESS",
+      creatorId: user3.id,
+      clientId: client1.id,
+      teamId: salesTeam.id,
+    },
+    {
+      title: "Marketing Campaign",
+      status: "BACKLOG",
+      creatorId: user3.id,
+      clientId: client2.id,
+      teamId: salesTeam.id,
+    },
+    {
+      title: "Contract Review",
+      status: "CLIENT_REVIEW",
+      creatorId: user1.id,
+      clientId: client3.id,
+      teamId: salesTeam.id,
+    },
+    {
+      title: "Product Demo",
+      status: "COMPLETE",
+      creatorId: user2.id,
+      clientId: client4.id,
+      teamId: devTeam.id,
+    },
+    {
+      title: "Bug Fixes",
+      status: "IN_PROGRESS",
+      creatorId: user2.id,
+      clientId: client5.id,
+      teamId: devTeam.id,
+    },
+    {
+      title: "Feature Request",
+      status: "BACKLOG",
+      creatorId: user1.id,
+      clientId: client1.id,
+      teamId: devTeam.id,
     },
     {
       title: "Security Audit",
-      description:
-        "Conduct comprehensive security audit of the application and implement necessary security measures.",
-      priority: "URGENT",
-      status: "IN_PROGRESS",
-      estimatedHours: 20.0,
-      tags: JSON.stringify(["security", "audit", "compliance"]),
-      creatorId: user1.id,
-      assigneeId: user3.id,
-      clientId: client5.id,
-    },
-    {
-      title: "Content Management System",
-      description:
-        "Build a custom CMS for managing website content with user-friendly admin interface.",
-      priority: "MEDIUM",
-      status: "COMPLETE",
-      estimatedHours: 40.0,
-      tags: JSON.stringify(["cms", "admin", "content"]),
-      creatorId: user2.id,
-      assigneeId: user1.id,
-      clientId: client1.id,
-    },
-    {
-      title: "Email Marketing Campaign",
-      description:
-        "Design and implement automated email marketing campaigns with analytics tracking.",
-      priority: "LOW",
-      status: "BACKLOG",
-      estimatedHours: 8.0,
-      tags: JSON.stringify(["email", "marketing", "automation"]),
-      creatorId: user3.id,
-      assigneeId: user2.id,
-      clientId: client2.id,
-    },
-    {
-      title: "Performance Monitoring",
-      description:
-        "Set up comprehensive performance monitoring and alerting system for production environment.",
-      priority: "HIGH",
-      status: "IN_PROGRESS",
-      estimatedHours: 16.0,
-      tags: JSON.stringify(["monitoring", "performance", "alerts"]),
-      creatorId: user1.id,
-      assigneeId: user3.id,
-      clientId: client3.id,
-    },
-    {
-      title: "User Authentication System",
-      description:
-        "Implement secure user authentication with OAuth, JWT tokens, and role-based access control.",
-      priority: "URGENT",
-      status: "CLIENT_REVIEW",
-      estimatedHours: 32.0,
-      tags: JSON.stringify(["auth", "security", "oauth"]),
-      creatorId: user2.id,
-      assigneeId: user1.id,
-      clientId: client4.id,
-    },
-    {
-      title: "Data Migration",
-      description:
-        "Migrate legacy data to new database schema with data validation and rollback procedures.",
-      priority: "MEDIUM",
       status: "REVISIONS",
-      estimatedHours: 28.0,
-      tags: JSON.stringify(["migration", "data", "validation"]),
       creatorId: user3.id,
-      assigneeId: user2.id,
-      clientId: client5.id,
-    },
-    {
-      title: "Frontend Component Library",
-      description:
-        "Create a reusable component library with comprehensive documentation and examples.",
-      priority: "LOW",
-      status: "COMPLETE",
-      estimatedHours: 36.0,
-      tags: JSON.stringify(["components", "library", "documentation"]),
-      creatorId: user1.id,
-      assigneeId: user3.id,
-      clientId: client1.id,
-    },
-    {
-      title: "Backup System Implementation",
-      description:
-        "Implement automated backup system with cloud storage integration and disaster recovery procedures.",
-      priority: "HIGH",
-      status: "BACKLOG",
-      estimatedHours: 20.0,
-      tags: JSON.stringify(["backup", "cloud", "disaster-recovery"]),
-      creatorId: user2.id,
-      assigneeId: user1.id,
       clientId: client2.id,
+      teamId: salesTeam.id,
     },
     {
-      title: "SEO Optimization",
-      description:
-        "Optimize website for search engines with meta tags, structured data, and performance improvements.",
-      priority: "MEDIUM",
+      title: "Performance Testing",
       status: "IN_PROGRESS",
-      estimatedHours: 12.0,
-      tags: JSON.stringify(["seo", "optimization", "meta-tags"]),
-      creatorId: user3.id,
-      assigneeId: user2.id,
-      clientId: client3.id,
-    },
-    {
-      title: "Load Testing",
-      description:
-        "Conduct comprehensive load testing to ensure application can handle expected traffic volumes.",
-      priority: "HIGH",
-      status: "CLIENT_REVIEW",
-      estimatedHours: 16.0,
-      tags: JSON.stringify(["testing", "load", "performance"]),
-      creatorId: user1.id,
-      assigneeId: user3.id,
-      clientId: client4.id,
-    },
-    {
-      title: "Documentation Update",
-      description:
-        "Update technical documentation and create user guides for new features.",
-      priority: "LOW",
-      status: "COMPLETE",
-      estimatedHours: 8.0,
-      tags: JSON.stringify(["documentation", "guides", "technical"]),
       creatorId: user2.id,
-      assigneeId: user1.id,
+      clientId: client3.id,
+      teamId: devTeam.id,
+    },
+    {
+      title: "User Training",
+      status: "COMPLETE",
+      creatorId: user3.id,
+      clientId: client4.id,
+      teamId: salesTeam.id,
+    },
+    {
+      title: "System Update",
+      status: "BACKLOG",
+      creatorId: user1.id,
       clientId: client5.id,
+      teamId: devTeam.id,
     },
   ];
 
-  for (const ticketData of tickets) {
-    await prisma.ticket.upsert({
-      where: {
-        id: `ticket-${ticketData.title.toLowerCase().replace(/\s+/g, "-")}`,
-      },
-      update: ticketData,
-      create: {
-        ...ticketData,
-        id: `ticket-${ticketData.title.toLowerCase().replace(/\s+/g, "-")}`,
+  for (const t of ticketRows) {
+    const slug = t.title.toLowerCase().replace(/\s+/g, "-");
+    await prisma.ticket.create({
+      data: {
+        id: `ticket-${slug}`,
+        ...t,
       },
     });
   }
 
-  console.log("✅ Database seeded successfully!");
-  console.log(`Created ${tickets.length} tickets`);
-  console.log("Test user: admin@example.com / password123");
+  console.log("✅ Seed complete.");
+  console.log("Super admin: superadmin@example.com / password123");
+  console.log("Employee: admin@example.com / password123");
+  console.log("Test user: test@example.com / password123 (Development team)");
+  console.log("Client portal user: acme@example.com / password123");
 }
 
 main()
   .catch((e) => {
-    console.error("❌ Error seeding database:", e);
+    console.error("❌ Seed failed:", e);
     process.exit(1);
   })
   .finally(async () => {

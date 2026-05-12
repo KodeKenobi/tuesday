@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@/contexts/AuthContext";
+import { useTeam } from "@/contexts/TeamContext";
 import DashboardLayout from "@/components/DashboardLayout";
 import {
   Plus,
@@ -44,33 +45,46 @@ interface Ticket {
 const statusConfig = {
   BACKLOG: {
     label: "Backlog",
-    color: "bg-gray-500/20 text-gray-400 border-gray-500/30",
+    color:
+      "bg-gray-100 text-gray-800 border border-gray-300 dark:bg-gray-500/20 dark:text-gray-300 dark:border-gray-500/30",
     icon: ClockIcon,
   },
   IN_PROGRESS: {
     label: "In Progress",
-    color: "bg-blue-500/20 text-blue-400 border-blue-500/30",
+    color:
+      "bg-blue-100 text-blue-800 border border-blue-300 dark:bg-blue-500/20 dark:text-blue-400 dark:border-blue-500/30",
     icon: Zap,
   },
   REVISIONS: {
     label: "Revisions",
-    color: "bg-yellow-500/20 text-yellow-400 border-yellow-500/30",
+    color:
+      "bg-yellow-100 text-yellow-900 border border-yellow-400 dark:bg-yellow-500/20 dark:text-yellow-400 dark:border-yellow-500/30",
     icon: AlertCircle,
   },
   CLIENT_REVIEW: {
     label: "Client Review",
-    color: "bg-purple-500/20 text-purple-400 border-purple-500/30",
+    color:
+      "bg-purple-100 text-purple-800 border border-purple-300 dark:bg-purple-500/20 dark:text-purple-400 dark:border-purple-500/30",
     icon: Eye,
   },
   COMPLETE: {
     label: "Complete",
-    color: "bg-green-500/20 text-green-400 border-green-500/30",
+    color:
+      "bg-green-100 text-green-800 border border-green-300 dark:bg-green-500/20 dark:text-green-400 dark:border-green-500/30",
     icon: CheckCircle,
   },
 };
 
 export default function TicketsPage() {
   const { user } = useAuth();
+  const {
+    teams,
+    activeTeamId,
+    setActiveTeamId,
+    isAllTeams,
+    setAllTeamsMode,
+    loading: teamLoading,
+  } = useTeam();
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -80,11 +94,28 @@ export default function TicketsPage() {
   const [viewMode] = useState<"grid" | "list">("grid");
 
   const fetchTickets = useCallback(async () => {
+    if (!user) return;
+    if (user.role === "CLIENT") {
+      setLoading(false);
+      return;
+    }
     try {
       setError("");
       const params = new URLSearchParams();
       if (statusFilter) {
         params.append("status", statusFilter);
+      }
+      if (user.role === "USER") {
+        if (!activeTeamId) {
+          setTickets([]);
+          setLoading(false);
+          return;
+        }
+        params.set("teamId", activeTeamId);
+      } else if (user.role === "SUPER_ADMIN") {
+        if (!isAllTeams && activeTeamId) {
+          params.set("teamId", activeTeamId);
+        }
       }
 
       const response = await fetch(`/api/tickets?${params}`);
@@ -100,11 +131,11 @@ export default function TicketsPage() {
     } finally {
       setLoading(false);
     }
-  }, [statusFilter]);
+  }, [statusFilter, user, activeTeamId, isAllTeams]);
 
   useEffect(() => {
-    fetchTickets();
-  }, [statusFilter, fetchTickets]);
+    if (user && user.role !== "CLIENT") fetchTickets();
+  }, [statusFilter, fetchTickets, user]);
 
   const handleStatusChange = async (ticketId: string, newStatus: string) => {
     try {
@@ -159,8 +190,10 @@ export default function TicketsPage() {
         {/* Header */}
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-bold text-white mb-2">All Tickets</h1>
-            <p className="text-gray-400">
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+              All Tickets
+            </h1>
+            <p className="text-gray-600 dark:text-gray-400">
               Manage and track all your project tickets
             </p>
           </div>
@@ -176,27 +209,59 @@ export default function TicketsPage() {
         </div>
 
         {/* Search and Filters */}
-        <div className="bg-gray-900/50 backdrop-blur-xl rounded-2xl border border-gray-800/50 p-6">
+        <div className="bg-white/80 dark:bg-gray-900/50 backdrop-blur-xl rounded-2xl border border-gray-200/80 dark:border-gray-800/50 p-6">
           <div className="flex flex-col lg:flex-row gap-4">
             {/* Search */}
             <div className="flex-1 relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-gray-400 w-4 h-4" />
               <input
                 type="text"
                 placeholder="Search tickets, clients, or assignees..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 bg-gray-800/50 border border-gray-700/50 rounded-lg text-white placeholder-gray-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition-all"
+                className="w-full pl-10 pr-4 py-2 bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700/50 rounded-lg text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition-all"
               />
             </div>
 
             {/* Status Filter */}
             <div className="flex items-center space-x-3">
-              <Filter className="w-4 h-4 text-gray-400" />
+              <select
+                value={
+                  user.role === "SUPER_ADMIN"
+                    ? isAllTeams
+                      ? "__all__"
+                      : activeTeamId
+                    : activeTeamId
+                }
+                onChange={(e) => {
+                  const v = e.target.value;
+                  if (user.role === "SUPER_ADMIN") {
+                    if (v === "__all__") setAllTeamsMode(true);
+                    else {
+                      setAllTeamsMode(false);
+                      setActiveTeamId(v);
+                    }
+                  } else {
+                    setActiveTeamId(v);
+                  }
+                }}
+                disabled={teamLoading || teams.length === 0 || user.role === "CLIENT"}
+                className="bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700/50 rounded-lg px-3 py-2 text-gray-900 dark:text-white focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition-all"
+              >
+                {user?.role === "SUPER_ADMIN" && (
+                  <option value="__all__">All teams</option>
+                )}
+                {teams.map((t) => (
+                  <option key={t.id} value={t.id}>
+                    {t.name}
+                  </option>
+                ))}
+              </select>
+              <Filter className="w-4 h-4 text-gray-500 dark:text-gray-400" />
               <select
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
-                className="bg-gray-800/50 border border-gray-700/50 rounded-lg px-3 py-2 text-white focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition-all"
+                className="bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700/50 rounded-lg px-3 py-2 text-gray-900 dark:text-white focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition-all"
               >
                 <option value="">All Statuses</option>
                 {Object.entries(statusConfig).map(([key, config]) => (
@@ -223,11 +288,13 @@ export default function TicketsPage() {
           </div>
         ) : filteredTickets.length === 0 ? (
           <div className="text-center py-12">
-            <div className="w-16 h-16 bg-gray-800/50 rounded-full flex items-center justify-center mx-auto mb-4">
-              <Search className="w-8 h-8 text-gray-400" />
+            <div className="w-16 h-16 bg-gray-100 dark:bg-gray-800/50 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Search className="w-8 h-8 text-gray-500 dark:text-gray-400" />
             </div>
-            <p className="text-gray-400 text-lg">No tickets found</p>
-            <p className="text-gray-500 text-sm mt-2">
+            <p className="text-gray-600 dark:text-gray-400 text-lg">
+              No tickets found
+            </p>
+            <p className="text-gray-500 dark:text-gray-500 text-sm mt-2">
               Try adjusting your search or filters
             </p>
           </div>
@@ -248,12 +315,12 @@ export default function TicketsPage() {
               return (
                 <div
                   key={ticket.id}
-                  className="bg-gray-900/50 backdrop-blur-xl rounded-xl border border-gray-800/50 p-6 hover:border-gray-700/50 transition-all duration-200 group"
+                  className="bg-white/90 dark:bg-gray-900/50 backdrop-blur-xl rounded-xl border border-gray-200/80 dark:border-gray-800/50 p-6 hover:border-indigo-300/50 dark:hover:border-gray-700/50 transition-all duration-200 group"
                 >
                   {/* Header */}
                   <div className="flex items-start justify-between mb-4">
                     <div className="flex-1">
-                      <h3 className="text-white font-semibold mb-1 group-hover:text-indigo-400 transition-colors">
+                      <h3 className="text-gray-900 dark:text-white font-semibold mb-1 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
                         {ticket.title}
                       </h3>
                       <div className="flex items-center space-x-2">
@@ -307,13 +374,13 @@ export default function TicketsPage() {
 
                   {/* Actions */}
                   {user.role === "USER" && (
-                    <div className="mt-4 pt-4 border-t border-gray-800/50">
+                    <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-800/50">
                       <select
                         value={ticket.status}
                         onChange={(e) =>
                           handleStatusChange(ticket.id, e.target.value)
                         }
-                        className="w-full bg-gray-800/50 border border-gray-700/50 rounded-lg px-3 py-2 text-white text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition-all"
+                        className="w-full bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700/50 rounded-lg px-3 py-2 text-gray-900 dark:text-white text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition-all"
                       >
                         {Object.entries(statusConfig).map(([key, config]) => (
                           <option key={key} value={key}>

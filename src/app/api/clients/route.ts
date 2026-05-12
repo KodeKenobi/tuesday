@@ -1,6 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
+import { Role } from "@prisma/client";
 import { db } from "@/lib/db";
 import { getUserFromRequest } from "@/lib/auth";
+
+function isInternalStaff(role: Role) {
+  return role === Role.USER || role === Role.SUPER_ADMIN;
+}
 
 export async function GET(request: NextRequest) {
   try {
@@ -8,6 +13,10 @@ export async function GET(request: NextRequest) {
 
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    if (!isInternalStaff(user.role)) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
     const clients = await db.client.findMany({
@@ -32,6 +41,10 @@ export async function POST(request: NextRequest) {
 
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    if (!isInternalStaff(user.role)) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
     const { name, email, isInvited = false } = await request.json();

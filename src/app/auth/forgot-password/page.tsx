@@ -41,7 +41,7 @@ export default function ForgotPasswordPage() {
       setSuccess(true);
     } catch (error) {
       setError(
-        error instanceof Error ? error.message : "Failed to send reset email"
+        error instanceof Error ? error.message : "Failed to send reset email",
       );
     } finally {
       setLoading(false);
@@ -49,7 +49,7 @@ export default function ForgotPasswordPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-gray-900 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-blue-900 to-gray-900 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -75,8 +75,8 @@ export default function ForgotPasswordPage() {
               Forgot Password
             </h1>
             <p className="text-gray-300 text-sm">
-              Enter your email address and we&apos;ll send you a link to reset your
-              password.
+              Enter your email address and we&apos;ll send you a link to reset
+              your password.
             </p>
           </motion.div>
 
@@ -93,14 +93,15 @@ export default function ForgotPasswordPage() {
                 Check Your Email
               </h2>
               <p className="text-gray-300 text-sm mb-6">
-                We&apos;ve sent a password reset link to <strong>{email}</strong>
+                We&apos;ve sent a password reset link to{" "}
+                <strong>{email}</strong>
               </p>
               <p className="text-gray-400 text-xs mb-6">
                 Note: For development, check the console for the reset link.
               </p>
               <Link
                 href="/auth/login"
-                className="inline-flex items-center justify-center w-full py-3 px-6 bg-gradient-to-r from-pink-500 to-purple-600 text-white text-base font-medium rounded-xl shadow-lg hover:from-pink-600 hover:to-purple-700 transition"
+                className="inline-flex items-center justify-center w-full py-3 px-6 bg-gradient-to-r from-blue-500 to-indigo-600 text-white text-base font-medium rounded-xl shadow-lg hover:from-blue-600 hover:to-indigo-700 transition"
               >
                 Return to Login
               </Link>
@@ -167,8 +168,8 @@ export default function ForgotPasswordPage() {
                   disabled={loading}
                   whileTap={{ scale: 0.97 }}
                   className={cn(
-                    "w-full py-3 px-6 bg-gradient-to-r from-pink-500 to-purple-600 text-white text-base font-medium rounded-xl shadow-lg hover:from-pink-600 hover:to-purple-700 transition flex items-center justify-center gap-2",
-                    loading && "opacity-70 cursor-not-allowed"
+                    "w-full py-3 px-6 bg-gradient-to-r from-blue-500 to-indigo-600 text-white text-base font-medium rounded-xl shadow-lg hover:from-blue-600 hover:to-indigo-700 transition flex items-center justify-center gap-2",
+                    loading && "opacity-70 cursor-not-allowed",
                   )}
                 >
                   {loading && <Loader2 className="w-5 h-5 animate-spin" />}
@@ -199,4 +200,4 @@ export default function ForgotPasswordPage() {
       </div>
     </div>
   );
-} 
+}

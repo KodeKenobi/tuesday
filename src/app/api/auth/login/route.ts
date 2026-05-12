@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { verifyPassword } from "@/lib/auth";
+import { getUserWithTeamAccess, teamIdsForUser } from "@/lib/access";
 
 export async function POST(request: NextRequest) {
   try {
@@ -33,12 +34,17 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    const full = await getUserWithTeamAccess(user.id);
+    const teamIds = full ? teamIdsForUser(full) : null;
+
     const response = NextResponse.json({
       user: {
         id: user.id,
         name: user.name,
         email: user.email,
         role: user.role,
+        teamId: user.teamId,
+        teamIds,
       },
     });
 

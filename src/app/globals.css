@@ -1,14 +1,16 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 :root {
-  --background: #121212;
-  --surface: #1e1e1e;
+  --background: #ffffff;
+  --surface: #f8f9fa;
   --primary: #6366f1;
   --secondary: #f472b6;
-  --text-primary: #ffffff;
-  --text-secondary: #b3b3b3;
+  --text-primary: #000000;
+  --text-secondary: #6c757d;
   --success: #22c55e;
-  --warning: #facc15;
+  --warning: #f59e0b;
   --error: #ef4444;
 }
 
@@ -18,8 +20,18 @@ body {
   overflow-x: hidden;
   background-color: var(--background);
   color: var(--text-primary);
-  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto",
-    "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
+  font-family:
+    "Inter",
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    "Roboto",
+    "Oxygen",
+    "Ubuntu",
+    "Cantarell",
+    "Fira Sans",
+    "Droid Sans",
+    "Helvetica Neue",
     sans-serif;
 }
 
@@ -198,7 +210,9 @@ body::-webkit-scrollbar {
 
 /* Hover effects */
 .hover-lift {
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
 .hover-lift:hover {
@@ -256,22 +270,23 @@ body::-webkit-scrollbar {
 
 .card-hover:hover {
   transform: translateY(-4px);
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1),
+  box-shadow:
+    0 20px 25px -5px rgba(0, 0, 0, 0.1),
     0 10px 10px -5px rgba(0, 0, 0, 0.04);
 }
 
 /* Button animations */
 .btn-primary {
-  @apply bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-6 py-3 rounded-xl font-medium transition-all duration-200 hover:from-indigo-700 hover:to-purple-700 hover:shadow-lg hover:scale-105 active:scale-95;
+  @apply bg-gradient-to-r from-sky-600 to-indigo-600 text-white px-6 py-3 rounded-xl font-medium transition-all duration-200 hover:from-sky-700 hover:to-indigo-700 hover:shadow-lg hover:scale-105 active:scale-95;
 }
 
 .btn-secondary {
-  @apply bg-gray-800/50 text-gray-300 px-6 py-3 rounded-xl font-medium transition-all duration-200 hover:bg-gray-700/50 hover:text-white border border-gray-700/50 hover:border-gray-600/50;
+  @apply bg-gray-100 text-gray-700 px-6 py-3 rounded-xl font-medium transition-all duration-200 hover:bg-gray-200 hover:text-gray-900 border border-gray-200 dark:bg-gray-800 dark:text-gray-200 dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:text-white;
 }
 
 /* Input styles */
 .input-modern {
-  @apply bg-gray-800/50 border border-gray-700/50 rounded-lg px-4 py-2 text-white placeholder-gray-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition-all duration-200;
+  @apply bg-gray-100 border border-gray-300 rounded-lg px-4 py-2 text-gray-900 placeholder-gray-500 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition-all duration-200 dark:bg-gray-800/50 dark:border-gray-600 dark:text-white dark:placeholder-gray-400;
 }
 
 /* Badge styles */
@@ -308,12 +323,19 @@ body::-webkit-scrollbar {
   }
 }
 
-/* Dark mode enhancements */
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
+    --background: #ffffff;
     --surface: #1a1a1a;
   }
+}
+
+/* Dark mode class override */
+.dark {
+  --background: #0a0a0a;
+  --surface: #1a1a1a;
+  --text-primary: #ffffff;
+  --text-secondary: #9ca3af;
 }
 
 /* Print styles */
